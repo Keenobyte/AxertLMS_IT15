@@ -6,6 +6,7 @@ using AxertLMS.Data;
 using AxertLMS.Helpers;
 using AxertLMS.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -286,64 +287,89 @@ namespace AxertLMS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddSection(
-            string section_name,
-            int strand_id,
-            string year_lvl,
-            CancellationToken cancellationToken)
+     string section_name,
+     string strand,
+     string year_lvl,
+     CancellationToken cancellationToken)
         {
-            section_name =
-                section_name?.Trim() ?? string.Empty;
+            section_name = section_name?.Trim() ?? string.Empty;
+            strand = strand?.Trim().ToUpperInvariant() ?? string.Empty;
+            year_lvl = year_lvl?.Trim() ?? string.Empty;
 
-            year_lvl =
-                year_lvl?.Trim() ?? string.Empty;
-
-            if (
-                string.IsNullOrWhiteSpace(section_name) ||
+            // Validate required fields.
+            if (string.IsNullOrWhiteSpace(section_name) ||
+                string.IsNullOrWhiteSpace(strand) ||
                 string.IsNullOrWhiteSpace(year_lvl))
             {
                 TempData["ErrorMessage"] =
-                    "Section name and year level are required.";
+                    "Section name, strand, and year level are required.";
 
-                return RedirectToAction(
-                    nameof(ManageSections));
+                return RedirectToAction(nameof(ManageSections));
             }
 
-            bool strandExists =
-                await _context.Strands.AnyAsync(
-                    s =>
-                        s.strand_id ==
-                        strand_id,
-                    cancellationToken);
+            // Validate allowed strand codes.
+            if (strand != "STEM" &&
+                strand != "HUMSS" &&
+                strand != "ABM")
+            {
+                TempData["ErrorMessage"] = "Invalid strand selected.";
+                return RedirectToAction(nameof(ManageSections));
+            }
 
-            if (!strandExists)
+            // Validate allowed year levels.
+            if (year_lvl != "11" && year_lvl != "12")
+            {
+                TempData["ErrorMessage"] = "Invalid year level selected.";
+                return RedirectToAction(nameof(ManageSections));
+            }
+
+            if (section_name.Length > 50)
             {
                 TempData["ErrorMessage"] =
-                    "Invalid strand selected.";
+                    "Section name cannot exceed 50 characters.";
 
-                return RedirectToAction(
-                    nameof(ManageSections));
+                return RedirectToAction(nameof(ManageSections));
+            }
+
+            bool sectionNameExists = await _context.Sections
+                .AnyAsync(
+                    s => s.section_name == section_name,
+                    cancellationToken);
+
+            if (sectionNameExists)
+            {
+                TempData["ErrorMessage"] =
+                    "A section with that name already exists. Enter a unique section name.";
+
+                return RedirectToAction(nameof(ManageSections));
+            }
+
+            // Find the strand record using its string code.
+            var selectedStrand = await _context.Strands
+                .SingleOrDefaultAsync(
+                    s => s.strand_code == strand,
+                    cancellationToken);
+
+            if (selectedStrand == null)
+            {
+                TempData["ErrorMessage"] =
+                    $"Strand '{strand}' was not found in the database.";
+
+                return RedirectToAction(nameof(ManageSections));
             }
 
             try
             {
-                var newSection =
-                    new Section
-                    {
-                        section_name =
-                            section_name,
+                var newSection = new Section
+                {
+                    section_name = section_name,
+                    strand_id = selectedStrand.strand_id,
+                    year_lvl = year_lvl
+                };
 
-                        strand_id =
-                            strand_id,
+                _context.Sections.Add(newSection);
 
-                        year_lvl =
-                            year_lvl
-                    };
-
-                _context.Sections.Add(
-                    newSection);
-
-                await _context.SaveChangesAsync(
-                    cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
 
                 TempData["SuccessMessage"] =
                     "Section added successfully.";
@@ -354,12 +380,14 @@ namespace AxertLMS.Controllers
                     ex,
                     "SECTION_CREATE_DATABASE_ERROR");
 
-                TempData["ErrorMessage"] =
-                    "The section could not be saved because of a database constraint.";
+                var sqlException = ex.GetBaseException() as SqlException;
+
+                TempData["ErrorMessage"] = sqlException?.Number is 2601 or 2627
+                    ? "A section with that name already exists. Enter a unique section name."
+                    : "The section could not be saved. Check the section details and try again.";
             }
 
-            return RedirectToAction(
-                nameof(ManageSections));
+            return RedirectToAction(nameof(ManageSections));
         }
 
         // ============================================================
