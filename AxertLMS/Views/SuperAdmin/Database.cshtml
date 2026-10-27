@@ -1,0 +1,134 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Database Architecture";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #0A0A0A; /* Pure black for developer terminal feel */
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #333333;
+        --accent-terminal: #10B981; /* Terminal Green */
+        --danger: #EF4444;
+    }
+
+    .db-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+        font-family: 'Consolas', 'Courier New', monospace; /* Strict Terminal Font */
+    }
+
+    .status-banner {
+        background-color: rgba(16, 185, 129, 0.05);
+        border-left: 4px solid var(--accent-terminal);
+        padding: 1rem;
+        margin-bottom: 2rem;
+        border-radius: 0 4px 4px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .db-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .db-table th {
+            text-align: left;
+            color: var(--accent-terminal);
+            border-bottom: 1px dashed var(--border-subtle);
+            padding-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .db-table td {
+            padding: 1rem 0;
+            border-bottom: 1px solid #1f1f1f;
+            font-size: 0.95rem;
+        }
+
+        .db-table tr:hover td {
+            background-color: rgba(255,255,255,0.02);
+        }
+
+    .btn-backup {
+        box-sizing: border-box !important;
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-subtle) !important;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+        .btn-backup:hover {
+            border-color: var(--accent-terminal) !important;
+            color: var(--accent-terminal) !important;
+        }
+</style>
+
+<div class="db-wrapper">
+    <div class="status-banner">
+        <div>
+            <h2 style="margin:0; font-size: 1.2rem; color: var(--accent-terminal);">SQL DATABASE MONITOR</h2>
+            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
+                Provider: @ViewBag.DbProvider | Status: <strong style="color: var(--accent-terminal);">@ViewBag.CanConnect</strong>
+            </p>
+        </div>
+        <div>
+            <button class="btn-backup" onclick="alert('Database snapshot initiated. Backing up data...')">
+                [ INIT_BACKUP ]
+            </button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+            > QUERY EXECUTED: SELECT COUNT(*) FROM [SCHEMA_TABLES];
+        </div>
+
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>SCHEMA TABLE NAME</th>
+                    <th>DATA TYPE</th>
+                    <th>INDEXED ROWS (COUNT)</th>
+                    <th>TABLE HEALTH</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var table in ViewBag.TableStats)
+                {
+                    <tr>
+                        <td><strong>dbo.@table.Key</strong></td>
+                        <td style="color: var(--text-secondary);">Relational Table</td>
+                        <td style="color: var(--text-primary);">@table.Value</td>
+                        <td>
+                            @if (table.Value > 100000)
+                            {
+                                <span style="color: var(--danger);">[ BLOAT_WARNING ]</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--accent-terminal);">[ OPTIMAL ]</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

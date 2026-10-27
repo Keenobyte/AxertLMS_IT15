@@ -1,0 +1,457 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = null;
+    ViewData["Title"] = "AXERT LMS Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AXERT LMS Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+            :root {
+                --bg-main: #1A1A1A;
+                --bg-card: #121212;
+                --bg-card-light: #1E1E1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #9CA3AF;
+                --border-subtle: #2D3748;
+                --navy-light: #0B1F3A;
+                --navy-dark: #020C1B;
+                --danger: #EF4444;
+                --success: #10B981;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+            }
+
+            body {
+                background: var(--bg-main);
+                color: var(--text-primary);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .page {
+                min-height: 100vh;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* =========================================================
+                           LEFT INFORMATION PANEL
+                           ========================================================= */
+            .left {
+                padding: 60px;
+                background: var(--bg-card);
+                border-right: 1px solid var(--border-subtle);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            /* Restored Brand Component */
+            .brand {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                padding: 25px;
+                border: 1px solid var(--border-subtle);
+                border-left: 4px solid var(--navy-light);
+                border-radius: 12px;
+                background: var(--bg-main);
+                max-width: 620px;
+                width: 100%;
+                margin: 0 auto 40px auto;
+            }
+
+                .brand img {
+                    width: 75px;
+                    height: auto;
+                    display: block;
+                }
+
+            .brand-title {
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: var(--text-primary);
+            }
+
+            .brand-subtitle {
+                color: var(--text-secondary);
+                margin-top: 5px;
+                font-size: 0.95rem;
+            }
+
+            /* Announcement Component */
+            .announcement-section {
+                max-width: 620px;
+                width: 100%;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .announcement-title {
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                letter-spacing: 1px;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+
+            .announcement-card {
+                background: var(--bg-card-light);
+                padding: 35px;
+                border-radius: 8px;
+                border: 1px solid var(--border-subtle);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            }
+
+                .announcement-card p {
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                    font-size: 0.95rem;
+                    margin-bottom: 12px;
+                }
+
+                .announcement-card strong {
+                    color: var(--text-primary);
+                }
+
+                .announcement-card ul {
+                    padding-left: 20px;
+                    margin-top: 10px;
+                    margin-bottom: 15px;
+                }
+
+                .announcement-card li {
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                    font-size: 0.95rem;
+                    margin-bottom: 8px;
+                }
+
+            /* =========================================================
+                           RIGHT LOGIN PANEL
+                           ========================================================= */
+            .right {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px;
+                background: var(--bg-main);
+            }
+
+            .card {
+                width: 100%;
+                max-width: 410px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 16px;
+                padding: 40px;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            }
+
+            h1 {
+                text-align: center;
+                margin: 0;
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: var(--text-primary);
+            }
+
+            .subtitle {
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                line-height: 1.5;
+                margin: 8px 0 25px;
+            }
+
+            .message {
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 18px;
+                font-size: 0.88rem;
+                line-height: 1.45;
+                text-align: center;
+            }
+
+            .error {
+                background: rgba(239, 68, 68, 0.10);
+                color: var(--danger);
+                border: 1px solid rgba(239, 68, 68, 0.20);
+            }
+
+            .success {
+                background: rgba(16, 185, 129, 0.10);
+                color: var(--success);
+                border: 1px solid rgba(16, 185, 129, 0.20);
+            }
+
+            .field {
+                margin-bottom: 17px;
+            }
+
+                .field label {
+                    display: block;
+                    margin-bottom: 7px;
+                    color: var(--text-secondary);
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                }
+
+            input {
+                width: 100%;
+                padding: 14px 16px;
+                background: var(--bg-main);
+                color: var(--text-primary);
+                border: 1px solid var(--border-subtle);
+                border-radius: 9px;
+                font-size: 0.96rem;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+                input::placeholder {
+                    color: var(--text-secondary);
+                    opacity: 0.75;
+                }
+
+                input:focus {
+                    outline: none;
+                    border-color: #4A5568;
+                    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+                }
+
+            .input-wrapper {
+                display: flex;
+                position: relative;
+            }
+
+            .toggle-password {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: var(--text-secondary);
+                cursor: pointer;
+                padding: 5px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .btn {
+                width: 100%;
+                display: block;
+                padding: 14px;
+                border-radius: 9px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                cursor: pointer;
+                text-align: center;
+                text-decoration: none;
+                transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+                margin-bottom: 12px;
+            }
+
+            .btn-primary {
+                border: 1px solid var(--border-subtle);
+                background: linear-gradient( 135deg, var(--navy-light), var(--navy-dark) );
+                color: var(--text-primary);
+            }
+
+                .btn-primary:hover {
+                    opacity: 0.92;
+                    transform: translateY(-1px);
+                }
+
+            .google-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                width: 100%;
+                padding: 14px;
+                margin-bottom: 12px;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 10px;
+                background: #FFFFFF;
+                color: #202124;
+                font-weight: 700;
+                font-size: 0.95rem;
+                border: 1px solid #DADCE0;
+                transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+                .google-button:hover {
+                    background: #F7F7F7;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.20);
+                }
+
+            .google-icon {
+                width: 18px;
+                height: 18px;
+                display: block;
+            }
+
+            .register-button {
+                display: block;
+                width: 100%;
+                padding: 14px;
+                margin-bottom: 12px;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 10px;
+                background: transparent;
+                color: var(--text-secondary);
+                font-weight: 700;
+                font-size: 0.95rem;
+                border: 1px solid var(--border-subtle);
+                transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            }
+
+                .register-button:hover {
+                    background: rgba(255, 255, 255, 0.04);
+                    color: var(--text-primary);
+                    border-color: #4A5568;
+                }
+
+            @@media (max-width: 850px) {
+                .page {
+                    grid-template-columns: 1fr;
+                }
+
+                .left {
+                    border-right: none;
+                    border-bottom: 1px solid var(--border-subtle);
+                    padding: 40px 25px;
+                }
+
+                .right {
+                    padding: 30px 20px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- LEFT INFORMATION PANEL -->
+        <section class="left">
+
+            <div class="brand">
+                <img src="~/images/logo.png" alt="Axert University">
+                <div>
+                    <div class="brand-title">Axert University</div>
+                    <div class="brand-subtitle">Learning Management System</div>
+                </div>
+            </div>
+
+            <div class="announcement-section">
+                <div class="announcement-title">Announcement</div>
+                <div class="announcement-card">
+                    <p><strong>Welcome to the Fall Semester!</strong></p>
+                    <p>We are thrilled to welcome both new and returning students to Axert University. Please review the important updates below to ensure a smooth start to your academic journey.</p>
+
+                    <p><strong>Important Semester Dates:</strong></p>
+                    <ul>
+                        <li>Classes Begin: Monday, September 1, 2026</li>
+                        <li>Add/Drop Deadline: Friday, September 15, 2026</li>
+                    </ul>
+
+                    <p><strong>Library Operating Hours:</strong></p>
+                    <ul>
+                        <li>Mon - Fri: 7:00 AM - 10:00 PM</li>
+                        <li>Sat - Sun: 9:00 AM - 8:00 PM</li>
+                    </ul>
+
+                    <p><strong>Campus Reminder:</strong> All students are required to wear their university ID clearly visible at all times while inside campus facilities.</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT LOGIN PANEL -->
+        <main class="right">
+            <div class="card">
+                <h1>Welcome Back</h1>
+                <p class="subtitle">Sign in using your AxertLMS account.</p>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="message error">@TempData["Error"]</div>
+                }
+                @if (ViewBag.Error != null)
+                {
+                    <div class="message error">@ViewBag.Error</div>
+                }
+                @if (TempData["RegistrationSuccess"] != null)
+                {
+                    <div class="message success">@TempData["RegistrationSuccess"]</div>
+                }
+
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="field">
+                        <label for="Email">Email Address</label>
+                        <input type="email" id="Email" name="Email" placeholder="Email Address" autocomplete="email" required>
+                    </div>
+
+                    <!-- Ordered Sequence Starts Here -->
+                    <div class="field">
+                        <label for="Password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="Password" name="Password" placeholder="Password" autocomplete="current-password" required>
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">Show</button>
+                        </div>
+                    </div>
+
+                    <a href="@Url.Action("GoogleLogin", "Account")" class="google-button">
+                        <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#4285F4" d="M21.35 12.27c0-.75-.07-1.51-.22-2.24H12v4.24h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.37z"></path>
+                            <path fill="#34A853" d="M12 21.99c2.63 0 4.84-.87 6.45-2.35l-3.14-2.44c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.52A9.74 9.74 0 0 0 12 21.99z"></path>
+                            <path fill="#FBBC05" d="M6.54 14.09a5.85 5.85 0 0 1 0-3.74V7.83H3.3a9.96 9.96 0 0 0 0 8.78l3.24-2.52z"></path>
+                            <path fill="#EA4335" d="M12 6.32c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.84 3.4 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.33l3.24 2.52C7.31 8.04 9.46 6.32 12 6.32z"></path>
+                        </svg>
+                        Continue with Google
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">Sign in</button>
+
+                    <a href="@Url.Action("Register", "Account")" class="register-button">New Student? Register Here</a>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Frontend Bug Fix for Password Toggle -->
+    <script>
+            document.getElementById('togglePasswordBtn').addEventListener('click', function() {
+                var passInput = document.getElementById('Password');
+                if (passInput.type === 'password') {
+                    passInput.type = 'text';
+                    this.textContent = 'Hide';
+                } else {
+                    passInput.type = 'password';
+                    this.textContent = 'Show';
+                }
+            });
+    </script>
+</body>
+</html>

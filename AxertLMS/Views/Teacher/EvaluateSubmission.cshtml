@@ -1,0 +1,108 @@
+﻿@model AxertLMS.Models.Submission
+@{
+    ViewData["Title"] = "Evaluate Submission";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var grade = ViewBag.ExistingGrade as AxertLMS.Models.Grade;
+    var maxScore = Model.Assignment?.MaxScore ?? 100;
+}
+
+<div style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+    <a href="@Url.Action("ClassGradebook", new { id = Model.Assignment?.classroom_id })"
+       style="color: var(--text-secondary); text-decoration: none; font-size: 1.2rem;" title="Back to Gradebook">
+        ←
+    </a>
+    <div>
+        <h1 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--text-primary);">Evaluate Submission</h1>
+        <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
+            @Model.Assignment?.title
+        </p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start;">
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 25px;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-subtle);">
+            <div>
+                <h2 style="margin: 0; font-size: 1.2rem; color: var(--text-primary);">
+                    @Model.Student?.User?.l_name, @Model.Student?.User?.f_name
+                </h2>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Student ID: @Model.Student?.student_number</span>
+            </div>
+            <div style="text-align: right;">
+                <span style="display: inline-block; padding: 4px 10px; background: rgba(16, 185, 129, 0.1); color: #10B981; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+                    Submitted
+                </span>
+            </div>
+        </div>
+
+        <div style="min-height: 300px;">
+            <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 15px;">Attached Files</h3>
+
+            @if (!string.IsNullOrEmpty(Model.file_path))
+            {
+                <div style="background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem; color: #3B82F6;">📄</span>
+                        <span style="color: var(--text-primary); font-weight: 500; word-break: break-all;">
+                            @System.IO.Path.GetFileName(Model.file_path)
+                        </span>
+                    </div>
+                    <a href="@Model.file_path" target="_blank"
+                       style="background: #3B82F6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; white-space: nowrap;">
+                        Open Document ↗
+                    </a>
+                </div>
+
+                <p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">
+                    * Document will open in a new tab so you can view it alongside this grading panel.
+                </p>
+            }
+            else
+            {
+                <div style="padding: 40px; text-align: center; border: 1px dashed var(--border-subtle); border-radius: 8px;">
+                    <p style="color: var(--text-secondary); margin: 0;">No file attachment found for this submission.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 25px; position: sticky; top: 20px;">
+        <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: var(--text-primary);">Evaluation</h3>
+
+        <form asp-action="EvaluateSubmission" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+            <input type="hidden" name="submission_id" value="@Model.submission_id" />
+
+            <div>
+                <label style="display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">
+                    Score (out of @maxScore)
+                </label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" name="score" value="@(grade?.score ?? 0)" min="0" max="@maxScore" step="0.01" required
+                           style="width: 100px; background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; font-size: 1.1rem; text-align: center; font-weight: bold;" />
+                    <span style="color: var(--text-secondary); font-size: 1.1rem;">/ @maxScore</span>
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">
+                    Teacher Feedback
+                </label>
+                <textarea name="feedback" rows="5" placeholder="Provide constructive feedback here..."
+                          style="width: 100%; background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; resize: vertical; font-family: inherit; font-size: 0.9rem;">@grade?.feedback</textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <button type="submit" style="background: #10B981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s;">
+                    Save Grade
+                </button>
+                <a href="@Url.Action("ClassGradebook", new { id = Model.Assignment?.classroom_id })"
+                   style="background: transparent; color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 0.9rem; transition: background 0.2s;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>

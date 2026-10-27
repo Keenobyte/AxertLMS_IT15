@@ -1,0 +1,174 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "System Administration";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --navy-dark: #020C1B;
+        --gradient: linear-gradient(to right, var(--navy-light), var(--navy-dark));
+        --danger: #EF4444;
+        --success: #10B981;
+        --accent: #3B82F6;
+    }
+
+    .dashboard-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+    }
+
+    .header-panel {
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--accent);
+        padding-left: 1rem;
+    }
+
+    /* API Grid Styles */
+    .api-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .api-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        border-top: 3px solid var(--text-secondary);
+    }
+
+    .api-title {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 0.5rem;
+    }
+
+    .api-content {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .api-subtext {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-family: monospace;
+    }
+
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .stat-val {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+        .stat-val.red {
+            background: linear-gradient(to right, #f87171, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-val.green {
+            background: linear-gradient(to right, #34d399, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="header-panel">
+        <h1 style="margin: 0;">System Operations</h1>
+        <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">Axert LMS Global Access Metrics & Operations</p>
+    </div>
+
+    <div class="api-grid">
+        <div class="api-card">
+            <div class="api-title">🛡️ Security Audit: Active Network</div>
+            <div class="api-content">Location: <strong>@ViewBag.AdminCity</strong></div>
+            <div class="api-subtext">IP Address: @ViewBag.AdminIP</div>
+            <div class="api-subtext">ISP Route: @ViewBag.AdminISP</div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-title">📅 Academic Calendar: Next Holiday</div>
+            <div class="api-content"><strong>@ViewBag.NextHolidayName</strong></div>
+            <div class="api-subtext">Date: @ViewBag.NextHolidayDate</div>
+            <div class="api-subtext">Region: Philippines (National)</div>
+        </div>
+    </div>
+
+    <div class="grid-4">
+        <div class="stat-card">
+            <span class="stat-val">@ViewBag.TotalUsers</span>
+            <span class="stat-label">Total System Users</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val green">@ViewBag.ActiveUsers</span>
+            <span class="stat-label">Active Accounts</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val red">@ViewBag.SuspendedUsers</span>
+            <span class="stat-label">Suspended Accounts</span>
+        </div>
+    </div>
+
+    <h3 style="margin-top: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">Role Distribution</h3>
+    <div class="grid-4">
+        <div class="stat-card">
+            <span class="stat-val" style="font-size: 1.8rem;">@ViewBag.AdminCount</span>
+            <span class="stat-label">Admins</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val" style="font-size: 1.8rem;">@ViewBag.RegistrarCount</span>
+            <span class="stat-label">Registrars</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val" style="font-size: 1.8rem;">@ViewBag.TeacherCount</span>
+            <span class="stat-label">Faculty</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val" style="font-size: 1.8rem;">@ViewBag.StudentCount</span>
+            <span class="stat-label">Students</span>
+        </div>
+    </div>
+</div>

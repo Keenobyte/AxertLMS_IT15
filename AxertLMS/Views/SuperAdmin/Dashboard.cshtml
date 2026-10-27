@@ -1,0 +1,84 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Super Admin Terminal";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #0A0A0A; /* Darker card for Super Admin */
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #333333;
+        --accent-danger: #DC2626;
+    }
+
+    .terminal-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+        font-family: 'Consolas', monospace;
+    }
+
+    .status-banner {
+        background-color: rgba(220, 38, 38, 0.1);
+        border-left: 4px solid var(--accent-danger);
+        padding: 1rem;
+        margin-bottom: 2rem;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .grid-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .sys-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+        padding: 1.5rem;
+        box-sizing: border-box !important;
+    }
+
+        .sys-card h3 {
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+    .sys-val {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--text-primary);
+    }
+
+    .online {
+        color: #10B981;
+        text-shadow: 0 0 10px rgba(16,185,129,0.5);
+    }
+</style>
+
+<div class="terminal-wrapper">
+    <div class="status-banner">
+        <h2 style="margin:0; font-size: 1.2rem; color: var(--text-primary);">SYSTEM ARCHITECTURE TERMINAL</h2>
+        <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">Warning: Changes made here alter core database structures.</p>
+    </div>
+
+    <div class="grid-panel">
+        <div class="sys-card">
+            <h3>Database Status</h3>
+            <span class="sys-val online">@ViewBag.DbStatus</span>
+        </div>
+        <div class="sys-card">
+            <h3>Total Indexed Rows</h3>
+            <span class="sys-val">@ViewBag.TotalDbRows</span>
+        </div>
+        <div class="sys-card">
+            <h3>Active School Admins</h3>
+            <span class="sys-val" style="color: #60A5FA;">@ViewBag.ActiveAdmins</span>
+        </div>
+    </div>
+</div>

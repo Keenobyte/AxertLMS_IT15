@@ -1,0 +1,248 @@
+﻿@model IEnumerable<AxertLMS.Models.User>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Global User Management";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --danger: #EF4444;
+        --danger-hover: #DC2626;
+        --success: #10B981;
+        --success-hover: #059669;
+    }
+
+    .wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+    }
+
+    .panel {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px;
+        padding: 1.5rem;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+        .data-table th {
+            text-align: left;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .data-table td {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.95rem;
+        }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-active {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid var(--success);
+    }
+
+    .badge-inactive {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+    }
+
+    .badge-role {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-subtle);
+    }
+
+    .btn-toggle {
+        box-sizing: border-box !important;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.8rem;
+        transition: background-color 0.2s;
+        color: white;
+    }
+
+    .btn-suspend {
+        background-color: var(--danger);
+    }
+
+        .btn-suspend:hover {
+            background-color: var(--danger-hover);
+        }
+
+    .btn-activate {
+        background-color: var(--success);
+    }
+
+        .btn-activate:hover {
+            background-color: var(--success-hover);
+        }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-weight: bold;
+    }
+
+    .alert-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--success);
+        color: var(--success);
+    }
+
+    .alert-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+</style>
+
+<div class="wrapper">
+    <h2 style="margin-bottom: 1.5rem;">Global User Directory</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>SYS ID</th>
+                    <th>NAME</th>
+                    <th>EMAIL</th>
+                    <th>SYSTEM ROLE</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td style="color: var(--text-secondary);">#@u.user_id</td>
+                        <td><strong>@u.l_name, @u.f_name</strong></td>
+                        <td style="color: var(--text-secondary);">@u.email</td>
+                        <td><span class="badge badge-role">@u.role</span></td>
+                        <td>
+                            @if (u.status == "Active")
+                            {
+                                <span class="badge badge-active">
+                                    ACTIVE
+                                </span>
+                            }
+                            else if (u.status == "Pending")
+                            {
+                                <span class="badge badge-role">
+                                    PENDING
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-inactive">
+                                    SUSPENDED
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (
+                                u.role != "Super Admin" &&
+                                u.status != "Pending")
+                            {
+                                <form method="post"
+                                      action="/Admin/ToggleUserStatus"
+                                      style="margin:0;">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="user_id"
+                                           value="@u.user_id" />
+
+                                    @if (u.status == "Active")
+                                    {
+                                        <button type="submit"
+                                                class="btn-toggle btn-suspend"
+                                                onclick="
+                                            return confirm(
+                                            'Suspend this user account?'
+                                            );
+                                            ">
+
+                                            Suspend Access
+
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit"
+                                                class="btn-toggle btn-activate">
+
+                                            Restore Access
+
+                                        </button>
+                                    }
+
+                                </form>
+                            }
+                            else if (u.status == "Pending")
+                            {
+                                <span style="
+                                    color:var(--text-secondary);
+                                    font-size:0.8rem;
+                                    font-style:italic;">
+
+                                    Awaiting Registrar
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="
+                                    color:var(--text-secondary);
+                                    font-size:0.8rem;
+                                    font-style:italic;">
+
+                                    Protected
+
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

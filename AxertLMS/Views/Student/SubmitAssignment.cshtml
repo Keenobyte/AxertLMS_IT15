@@ -1,0 +1,252 @@
+﻿@model AxertLMS.Models.Assignment
+@{
+    ViewData["Title"] = "Submit Assignment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool hasSubmitted = ViewBag.HasSubmitted != null && (bool)ViewBag.HasSubmitted;
+    var submission = ViewBag.SubmissionDetails as AxertLMS.Models.Submission;
+}
+
+<style>
+    /* Shared variables from our palette */
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --success: #10B981;
+        --danger: #EF4444;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-back {
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        transition: color 0.2s;
+    }
+
+        .btn-back:hover {
+            color: var(--text-primary);
+        }
+
+    /* Hero Context Banner */
+    .assignment-hero {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-main) 100%);
+        border: 1px solid var(--border-subtle);
+        border-left: 5px solid var(--navy-light);
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .assignment-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 15px 0;
+    }
+
+    .meta-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .meta-badge {
+        background: rgba(45, 55, 72, 0.4);
+        border: 1px solid var(--border-subtle);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .due-date {
+        color: #FCA5A5; /* Soft red to draw attention to deadlines */
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .submission-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Reassuring Success State */
+    .success-box {
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 12px;
+        padding: 40px 30px;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: var(--success);
+        margin-bottom: 15px;
+        line-height: 1;
+    }
+
+    /* File Upload Area */
+    .upload-area {
+        border: 2px dashed var(--border-subtle);
+        border-radius: 12px;
+        padding: 40px 20px;
+        background: rgba(255,255,255,0.02);
+        transition: all 0.2s ease;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+        .upload-area:hover {
+            border-color: var(--navy-light);
+            background: rgba(11, 31, 58, 0.1);
+        }
+
+    input[type="file"] {
+        display: block;
+        margin: 0 auto;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+        /* Styling the default ugly browser file button */
+        input[type="file"]::file-selector-button {
+            background: var(--border-subtle);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 15px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+            input[type="file"]::file-selector-button:hover {
+                background: var(--navy-light);
+            }
+
+    .btn-submit {
+        background: var(--navy-light);
+        color: var(--text-primary);
+        border: none;
+        padding: 14px 30px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        width: 100%;
+        max-width: 300px;
+        display: block;
+        margin: 0 auto;
+    }
+
+        .btn-submit:hover {
+            background: #112d52;
+            transform: translateY(-2px);
+        }
+
+    .btn-view-work {
+        display: inline-block;
+        margin-top: 20px;
+        background: var(--border-subtle);
+        color: var(--text-primary);
+        padding: 10px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+        .btn-view-work:hover {
+            background: var(--navy-light);
+        }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--danger);
+        color: #FCA5A5;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+
+<div class="page-header">
+    <a href="/Student/ClassDetails/@Model.classroom_id" class="btn-back">
+        <span>&larr;</span> Back to @Model.Classroom?.Subject?.subject_name
+    </a>
+</div>
+
+<div class="assignment-hero">
+    <h1 class="assignment-title">@Model.title</h1>
+    <div class="meta-badges">
+        <div class="meta-badge"><span>📚</span> @Model.Classroom?.Subject?.subject_name</div>
+        <div class="meta-badge due-date"><span>⏰</span> Due: @Model.due_date.ToString("dddd, MMM dd, yyyy - h:mm tt")</div>
+    </div>
+</div>
+
+<div class="submission-card">
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert-error">
+            <span>⚠️</span> @TempData["Error"]
+        </div>
+    }
+
+    @if (hasSubmitted && submission != null)
+    {
+        <div class="success-box">
+            <div class="success-icon">✓</div>
+            <h2 style="color: var(--text-primary); margin: 0 0 10px 0;">Work Successfully Turned In!</h2>
+            <p style="color: var(--text-secondary); margin: 0;">You submitted your file on @submission.submitted_at.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+
+            <a href="@submission.file_path" target="_blank" class="btn-view-work">
+                <span>📄</span> View Uploaded File
+            </a>
+        </div>
+    }
+    else
+    {
+        <form action="/Student/UploadSubmission" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="assignment_id" value="@Model.assignment_id" />
+            <input type="hidden" name="classroom_id" value="@Model.classroom_id" />
+
+            <div class="upload-area">
+                <div style="font-size: 2rem; margin-bottom: 15px; opacity: 0.5;">📁</div>
+                <h3 style="color: var(--text-primary); margin-top: 0;">Upload your work</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">PDF, DOCX, or Image files accepted.</p>
+
+                <input type="file" name="studentFile" id="studentFile" required />
+            </div>
+
+            <button type="submit" class="btn-submit">Turn In Assignment</button>
+        </form>
+    }
+</div>

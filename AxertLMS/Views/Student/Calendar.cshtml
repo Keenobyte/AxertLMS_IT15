@@ -1,0 +1,170 @@
+﻿@model List<AxertLMS.Models.Assignment>
+@{
+    ViewData["Title"] = "Weekly Calendar";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    DateTime startOfWeek = ViewBag.StartOfWeek;
+    DateTime endOfWeek = ViewBag.EndOfWeek;
+    string prevWeek = ViewBag.PrevWeek;
+    string nextWeek = ViewBag.NextWeek;
+    var submittedIds = ViewBag.SubmittedIds as List<int> ?? new List<int>();
+}
+
+<style>
+    .cal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #121212;
+        border: 1px solid #2D3748;
+        padding: 20px 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .week-title {
+        color: #FFFFFF;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .btn-nav {
+        background: #0B1F3A;
+        color: #FFFFFF;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+        .btn-nav:hover {
+            background: #112d52;
+        }
+
+    .day-block {
+        background: #1A1A1A;
+        border: 1px solid #2D3748;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .day-header {
+        background: #121212;
+        padding: 15px 20px;
+        border-bottom: 1px solid #2D3748;
+        color: #E2E8F0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+    }
+
+        .day-header.today {
+            background: rgba(11, 31, 58, 0.5);
+            border-left: 4px solid #3B82F6;
+        }
+
+    .task-list {
+        padding: 15px 20px;
+    }
+
+    .cal-task {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid #2D3748;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+        .cal-task:last-child {
+            margin-bottom: 0;
+        }
+
+    .task-time {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+        width: 90px;
+    }
+
+    .task-name {
+        color: #FFFFFF;
+        font-weight: bold;
+        flex-grow: 1;
+        margin-left: 15px;
+    }
+
+    .task-subj {
+        background: #2D3748;
+        color: #E2E8F0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin-right: 15px;
+    }
+
+    .status-check {
+        color: #10B981;
+        font-weight: bold;
+    }
+</style>
+
+<div class="cal-header">
+    <a href="/Student/Calendar?targetDate=@prevWeek" class="btn-nav">← Previous Week</a>
+
+    <div style="text-align: center;">
+        <h2 class="week-title">🗓️ Week at a Glance</h2>
+        <div style="color: #9CA3AF;">@startOfWeek.ToString("MMM dd") - @endOfWeek.ToString("MMM dd, yyyy")</div>
+    </div>
+
+    <a href="/Student/Calendar?targetDate=@nextWeek" class="btn-nav">Next Week →</a>
+</div>
+
+@for (int i = 0; i < 7; i++)
+{
+    DateTime currentDay = startOfWeek.AddDays(i);
+    var dayTasks = Model.Where(a => a.due_date.Date == currentDay.Date).ToList();
+    bool isToday = currentDay.Date == DateTime.Today;
+
+    <div class="day-block">
+        <div class="day-header @(isToday ? "today" : "")">
+            <span>@currentDay.ToString("dddd")</span>
+            <span style="color: #9CA3AF; font-size: 0.9rem;">@currentDay.ToString("MMM dd")</span>
+        </div>
+
+        <div class="task-list">
+            @if (!dayTasks.Any())
+            {
+                <div style="color: #6B7280; font-style: italic; font-size: 0.9rem;">No assignments due.</div>
+            }
+            else
+            {
+                foreach (var task in dayTasks)
+                {
+                    bool isDone = submittedIds.Contains(task.assignment_id);
+
+                    <div class="cal-task">
+                        <div class="task-time">@task.due_date.ToString("h:mm tt")</div>
+                        <div class="task-name">
+                            <a href="/Student/SubmitAssignment/@task.assignment_id" style="color: #FFF; text-decoration: none;">@task.title</a>
+                        </div>
+                        <div class="task-subj">@task.Classroom?.Subject?.subject_name</div>
+
+                        @if (isDone)
+                        {
+                            <div class="status-check">✓ Done</div>
+                        }
+                        else
+                        {
+                            <div style="color: #EF4444; font-size: 0.85rem; font-weight: bold;">Pending</div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}

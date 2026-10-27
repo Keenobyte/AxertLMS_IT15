@@ -1,0 +1,239 @@
+﻿@model AxertLMS.Models.ParaphraserViewModel
+
+@{
+    ViewData["Title"] = "Paraphraser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .paraphraser-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .paraphraser-heading {
+        margin-bottom: 28px;
+    }
+
+    .paraphraser-heading h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        font-weight: 750;
+    }
+
+    .paraphraser-heading p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .paraphraser-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .paraphraser-label {
+        display: block;
+        font-weight: 650;
+        margin-bottom: 10px;
+    }
+
+    .paraphraser-input,
+    .paraphraser-select {
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 13px;
+        font: inherit;
+    }
+
+    .paraphraser-input {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    .paraphraser-input:focus,
+    .paraphraser-select:focus {
+        outline: 2px solid #3B82F6;
+        outline-offset: 1px;
+    }
+
+    .paraphraser-field {
+        margin-bottom: 20px;
+    }
+
+    .paraphraser-button {
+        border: 0;
+        border-radius: 7px;
+        padding: 12px 18px;
+        background: #3B82F6;
+        color: white;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .paraphraser-button:hover {
+        background: #2563EB;
+    }
+
+    .paraphraser-copy {
+        background: #374151;
+        margin-left: 8px;
+    }
+
+    .paraphraser-copy:hover {
+        background: #4B5563;
+    }
+
+    .paraphraser-result {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.8;
+        color: var(--text-primary);
+    }
+
+    .paraphraser-validation {
+        color: #F87171;
+        display: block;
+        margin-top: 8px;
+    }
+
+    .paraphraser-note {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.6;
+        margin-top: 14px;
+    }
+
+    @@media (max-width: 640px) {
+        .paraphraser-panel {
+            padding: 16px;
+        }
+
+        .paraphraser-heading h1 {
+            font-size: 1.6rem;
+        }
+
+        .paraphraser-copy {
+            margin: 10px 0 0;
+        }
+    }
+</style>
+
+<div class="paraphraser-page">
+    <div class="paraphraser-heading">
+        <h1>Paraphraser</h1>
+        <p>
+            Rewrite text using simple vocabulary substitutions and
+            style adjustments.
+        </p>
+    </div>
+
+    <div class="paraphraser-panel">
+        <form asp-controller="Paraphraser"
+              asp-action="Index"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div class="paraphraser-field">
+                <label asp-for="Text" class="paraphraser-label">
+                    Original text
+                </label>
+
+                <textarea asp-for="Text"
+                          class="paraphraser-input"
+                          placeholder="Paste or type your text here..."
+                          maxlength="10000"
+                          required></textarea>
+
+                <span asp-validation-for="Text"
+                      class="paraphraser-validation"></span>
+            </div>
+
+            <div class="paraphraser-field">
+                <label asp-for="Style" class="paraphraser-label">
+                    Writing style
+                </label>
+
+                <select asp-for="Style" class="paraphraser-select">
+                    <option value="Standard">Standard</option>
+                    <option value="Formal">Formal</option>
+                    <option value="Simpler">Simpler wording</option>
+                </select>
+
+                <span asp-validation-for="Style"
+                      class="paraphraser-validation"></span>
+            </div>
+
+            <button type="submit" class="paraphraser-button">
+                Paraphrase Text
+            </button>
+
+            <p class="paraphraser-note">
+                Review the result before using it. This offline tool uses
+                predefined word substitutions; it does not understand every
+                sentence's meaning and may not preserve context perfectly.
+            </p>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Result))
+    {
+        <div class="paraphraser-panel">
+            <h2 style="margin-top: 0;">Paraphrased result</h2>
+
+            <div id="paraphraserResult" class="paraphraser-result">@Model.Result</div>
+
+            <button type="button"
+                    class="paraphraser-button paraphraser-copy"
+                    onclick="copyParaphrasedText()">
+                Copy Result
+            </button>
+
+            <span id="copyStatus"
+                  role="status"
+                  style="color: var(--text-secondary); margin-left: 10px;">
+            </span>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        async function copyParaphrasedText() {
+            const result = document.getElementById("paraphraserResult");
+            const status = document.getElementById("copyStatus");
+
+            if (!result || !status) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(result.innerText);
+                status.textContent = "Copied to clipboard.";
+            } catch {
+                const range = document.createRange();
+                range.selectNodeContents(result);
+
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                status.textContent =
+                    "Text selected. Press Ctrl+C to copy it.";
+
+                selection.removeAllRanges();
+            }
+        }
+    </script>
+}

@@ -1,0 +1,114 @@
+﻿@model IEnumerable<AxertLMS.Models.User>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Access Control Matrix";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A; --bg-card: #0A0A0A; --text-primary: #FFFFFF; --text-secondary: #9CA3AF;
+        --border-subtle: #333333; --navy-light: #0B1F3A; --accent: #3B82F6;
+    }
+
+    .terminal-wrapper { padding: 2rem; color: var(--text-primary); font-family: 'Consolas', monospace; }
+    
+    .status-banner {
+        background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--accent);
+        padding: 1rem; margin-bottom: 2rem; border-radius: 0 4px 4px 0;
+    }
+
+    .panel { background-color: var(--bg-card) !important; border: 1px solid var(--border-subtle) !important; border-radius: 8px; padding: 1.5rem; overflow-x: auto; }
+
+    /* Search Bar Strict HCI */
+    .search-form { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .search-input {
+        box-sizing: border-box !important; background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-subtle) !important; color: var(--text-primary) !important;
+        padding: 0.75rem; border-radius: 4px; flex: 1; font-family: inherit;
+    }
+    .search-input:focus { outline: none !important; border-color: var(--accent) !important; }
+    .btn-search {
+        box-sizing: border-box !important; background-color: var(--border-subtle) !important;
+        color: var(--text-primary) !important; border: none; padding: 0.75rem 1.5rem;
+        border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .data-table th { text-align: left; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; font-size: 0.85rem; }
+    .data-table td { padding: 1rem 0; border-bottom: 1px solid var(--border-subtle); font-size: 0.95rem; }
+
+    .form-select {
+        box-sizing: border-box !important; background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-subtle) !important; color: var(--text-primary) !important;
+        padding: 0.5rem; border-radius: 4px; font-family: inherit; width: 140px;
+    }
+
+    .btn-update {
+        box-sizing: border-box !important; background-color: var(--accent) !important;
+        color: #fff !important; border: none; padding: 0.5rem 1rem; border-radius: 4px;
+        cursor: pointer; font-weight: bold; font-size: 0.8rem;
+    }
+
+    .alert { padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: bold; font-family: sans-serif; }
+    .alert-success { background-color: rgba(16, 185, 129, 0.1); border: 1px solid #10B981; color: #10B981; }
+    .alert-danger { background-color: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; color: #EF4444; }
+</style>
+
+<div class="terminal-wrapper">
+    <div class="status-banner">
+        <h2 style="margin:0; font-size: 1.2rem; color: var(--text-primary);">ACCESS CONTROL MATRIX</h2>
+        <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">Modify core system privileges across the entire database.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+
+    <div class="panel">
+        <form method="get" action="/SuperAdmin/RoleManager" class="search-form">
+            <input type="text" name="searchQuery" class="search-input" placeholder="Search by Name or Email..." autocomplete="off" />
+            <button type="submit" class="btn-search">Execute Search</button>
+        </form>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>SYS ID</th>
+                    <th>USER IDENTITY</th>
+                    <th>CURRENT CLEARANCE</th>
+                    <th>NEW CLEARANCE</th>
+                    <th>EXECUTE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td style="color: var(--text-secondary);">#@u.user_id</td>
+                        <td>
+                            <strong style="color: var(--text-primary);">@u.l_name, @u.f_name</strong><br />
+                            <span style="color: var(--text-secondary); font-size: 0.8rem;">@u.email</span>
+                        </td>
+                        <td style="color: var(--accent);">[@u.role.ToUpper()]</td>
+                        
+                        <form method="post" action="/SuperAdmin/ChangeRole" style="margin: 0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="user_id" value="@u.user_id" />
+                            <td>
+                                <select name="new_role" class="form-select">
+                                    <option value="Student" selected="@(u.role == "Student")">Student</option>
+                                    <option value="Teacher" selected="@(u.role == "Teacher")">Teacher</option>
+                                    <option value="Registrar" selected="@(u.role == "Registrar")">Registrar</option>
+                                    <option value="Admin" selected="@(u.role == "Admin")">Admin</option>
+                                    <option value="Super Admin" selected="@(u.role == "Super Admin")">Super Admin</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button type="submit" class="btn-update" onclick="return confirm('Override system access for this user?');">Update</button>
+                            </td>
+                        </form>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

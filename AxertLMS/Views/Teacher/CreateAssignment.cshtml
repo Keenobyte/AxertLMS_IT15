@@ -1,0 +1,336 @@
+﻿@* File: AxertLMS/Views/Teacher/CreateAssignment.cshtml *@
+
+@model AxertLMS.ViewModels.CreateAssignmentViewModel
+
+@{
+    ViewData["Title"] = "Create Assignment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string classroomTitle = ViewBag.ClassroomTitle as string
+        ?? "Your Classroom";
+}
+
+<style>
+    .assignment-page {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .assignment-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        color: #9CA3AF;
+        text-decoration: none;
+    }
+
+        .assignment-back:hover {
+            color: #FFFFFF;
+        }
+
+    .assignment-heading {
+        margin-bottom: 25px;
+    }
+
+        .assignment-heading h1 {
+            font-size: 1.9rem;
+            margin: 0 0 8px;
+            color: #FFFFFF;
+        }
+
+        .assignment-heading p {
+            color: #9CA3AF;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+    .assignment-form {
+        padding: 28px;
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 12px;
+    }
+
+    .form-section-title {
+        margin: 0 0 20px;
+        font-size: 1.05rem;
+        color: #FFFFFF;
+    }
+
+    .assignment-field {
+        margin-bottom: 22px;
+    }
+
+        .assignment-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #E5E7EB;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+    .assignment-input {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid #374151;
+        border-radius: 7px;
+        background: #1A1A1A;
+        color: #FFFFFF;
+        font: inherit;
+    }
+
+        .assignment-input:focus {
+            outline: 2px solid #3B82F6;
+            outline-offset: 1px;
+            border-color: #3B82F6;
+        }
+
+    textarea.assignment-input {
+        min-height: 130px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .assignment-help {
+        display: block;
+        margin-top: 7px;
+        color: #9CA3AF;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    .field-validation {
+        display: block;
+        margin-top: 7px;
+        color: #FCA5A5;
+        font-size: 0.85rem;
+    }
+
+    .validation-summary-errors {
+        margin-bottom: 22px;
+        padding: 13px 16px;
+        border: 1px solid #7F1D1D;
+        border-radius: 7px;
+        background: #2B1515;
+        color: #FCA5A5;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+    .assignment-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .assignment-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding-top: 8px;
+        border-top: 1px solid #2D3748;
+    }
+
+    .assignment-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 10px 18px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        font-size: 0.9rem;
+        font-weight: 650;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .assignment-button-primary {
+        background: #2563EB;
+        border-color: #2563EB;
+        color: #FFFFFF;
+    }
+
+        .assignment-button-primary:hover {
+            background: #1D4ED8;
+            color: #FFFFFF;
+        }
+
+    .assignment-button-secondary {
+        background: transparent;
+        border-color: #374151;
+        color: #D1D5DB;
+    }
+
+        .assignment-button-secondary:hover {
+            background: #1F2937;
+            color: #FFFFFF;
+        }
+
+    @@media (max-width: 640px) {
+        .assignment-form {
+            padding: 18px;
+        }
+
+        .assignment-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .assignment-heading h1 {
+            font-size: 1.55rem;
+        }
+
+        .assignment-actions {
+            flex-direction: column-reverse;
+        }
+
+        .assignment-button {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+<div class="assignment-page">
+    <a href="@Url.Action(
+                   "ClassroomDetails",
+                   "Teacher",
+                   new { id = Model.ClassroomId })"
+       class="assignment-back">
+        <span aria-hidden="true">←</span>
+        Back to classroom
+    </a>
+
+    <header class="assignment-heading">
+        <h1>Create Assignment</h1>
+        <p>
+            Publish work, instructions, and a due date for
+            <strong>@classroomTitle</strong>.
+        </p>
+    </header>
+
+    <form asp-controller="TeacherAssignments"
+          asp-action="Create"
+          method="post"
+          class="assignment-form">
+
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <input asp-for="ClassroomId" type="hidden" />
+
+        <h2 class="form-section-title">Assignment details</h2>
+
+        <div class="assignment-field">
+            <label asp-for="Title">Assignment title *</label>
+
+            <input asp-for="Title"
+                   class="assignment-input"
+                   placeholder="e.g. Chapter 4 Written Activity"
+                   maxlength="150"
+                   autocomplete="off" />
+
+            <span asp-validation-for="Title"
+                  class="field-validation"></span>
+        </div>
+
+        <div class="assignment-field">
+            <label asp-for="Description">Instructions</label>
+
+            <textarea asp-for="Description"
+                      class="assignment-input"
+                      placeholder="Explain what students need to do..."></textarea>
+
+            <span asp-validation-for="Description"
+                  class="field-validation"></span>
+
+            <small class="assignment-help">
+                Describe the expected output, submission format,
+                or other important instructions.
+            </small>
+        </div>
+
+        <div class="assignment-field">
+            <label asp-for="DueDate">Due date and time *</label>
+
+            <input asp-for="DueDate"
+                   type="datetime-local"
+                   class="assignment-input" />
+
+            <span asp-validation-for="DueDate"
+                  class="field-validation"></span>
+
+            <small class="assignment-help">
+                The due date determines which week displays this
+                assignment in the student calendar.
+            </small>
+        </div>
+
+        <div class="assignment-field">
+            <label asp-for="AttachmentLink">Reference link</label>
+
+            <input asp-for="AttachmentLink"
+                   type="url"
+                   class="assignment-input"
+                   placeholder="https://example.com/reference" />
+
+            <span asp-validation-for="AttachmentLink"
+                  class="field-validation"></span>
+        </div>
+
+        <div class="assignment-grid">
+            <div class="assignment-field">
+                <label asp-for="Category">Grading category *</label>
+
+                <select asp-for="Category" class="assignment-input">
+                    <option value="WW">Written Work (WW)</option>
+                    <option value="PT">Performance Task (PT)</option>
+                    <option value="QA">Quarterly Assessment (QA)</option>
+                </select>
+
+                <span asp-validation-for="Category"
+                      class="field-validation"></span>
+            </div>
+
+            <div class="assignment-field">
+                <label asp-for="MaxScore">Maximum score *</label>
+
+                <input asp-for="MaxScore"
+                       type="number"
+                       min="1"
+                       max="10000"
+                       class="assignment-input" />
+
+                <span asp-validation-for="MaxScore"
+                      class="field-validation"></span>
+            </div>
+        </div>
+
+        <div class="assignment-actions">
+            <a href="@Url.Action(
+                                   "ClassroomDetails",
+                                   "Teacher",
+                                   new { id = Model.ClassroomId })"
+               class="assignment-button assignment-button-secondary">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="assignment-button assignment-button-primary">
+                Publish Assignment
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

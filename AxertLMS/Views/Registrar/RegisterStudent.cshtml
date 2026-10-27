@@ -1,0 +1,302 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Process Student Enrollment";
+}
+
+<style>
+
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --navy-dark: #020C1B;
+        --success: #10B981;
+        --danger: #EF4444;
+    }
+
+    .dashboard-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 2.5rem;
+        max-width: 700px;
+        margin: 2rem auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.03em;
+    }
+
+    .form-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.85rem;
+        margin-bottom: 1.5rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-main);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-select option {
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+    .info-box {
+        background: rgba(255, 255, 255, 0.02);
+        border-left: 4px solid var(--navy-light);
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0 6px 6px 0;
+    }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .info-box p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+    .status-box {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .success {
+        color: var(--success);
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .error {
+        color: var(--danger);
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+        background: linear-gradient( to right, var(--navy-light), var(--navy-dark) );
+        color: var(--text-primary);
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+        .btn-submit:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+    .empty-state {
+        color: var(--text-secondary);
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+</style>
+
+<div class="dashboard-wrapper">
+
+    <h2 style="text-align: center;">
+        Process Student Enrollment
+    </h2>
+
+    <p style="
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        ">
+        Approve a pending student application and assign
+        the student to an academic section.
+    </p>
+
+    <div class="form-card">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="status-box success">
+
+                <strong>
+                    Enrollment completed
+                </strong>
+
+                <span>
+                    @TempData["SuccessMessage"]
+                </span>
+
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="status-box error">
+
+                <strong>
+                    Enrollment failed
+                </strong>
+
+                <span>
+                    @TempData["ErrorMessage"]
+                </span>
+
+            </div>
+        }
+
+        @if (ViewBag.PendingUsers == null ||
+             !((IEnumerable<AxertLMS.Models.User>)ViewBag.PendingUsers).Any())
+        {
+            <div class="empty-state">
+
+                <p>
+                    There are currently no pending student
+                    enrollment applications.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <form asp-controller="Registrar"
+                  asp-action="RegisterStudent"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <label class="form-label">
+                    SELECT PENDING STUDENT
+                </label>
+
+                <select name="user_id"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Student --
+                    </option>
+
+                    @foreach (
+                        var user
+                        in (IEnumerable<AxertLMS.Models.User>)ViewBag.PendingUsers)
+                    {
+                        <option value="@user.user_id">
+
+                            @user.l_name,
+                            @user.f_name
+                            —
+                            @user.email
+
+                        </option>
+                    }
+
+                </select>
+
+                <div class="info-box">
+
+                    <strong>
+                        <i class="fas fa-id-card"></i>
+                        Student Number
+                    </strong>
+
+                    <p>
+                        The official student number is generated
+                        automatically by the server after approval.
+                        It cannot be entered or modified by the browser.
+                    </p>
+
+                </div>
+
+                <label class="form-label">
+                    ASSIGN TO SECTION
+                </label>
+
+                <select name="section_id"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Section --
+                    </option>
+
+                    @if (ViewBag.Sections != null)
+                    {
+                        foreach (
+                            var sec
+                            in ViewBag.Sections)
+                        {
+                            <option value="@sec.section_id">
+
+                                @sec.section_name
+                                —
+                                Grade @sec.year_lvl
+                                —
+                                @(sec.Strand?.strand_code ?? "N/A")
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+                <div class="info-box">
+
+                    <strong>
+                        <i class="fas fa-gears"></i>
+                        Automatic Enrollment
+                    </strong>
+
+                    <p>
+                        After approval, the system checks the selected
+                        section's strand and year level against the
+                        curriculum mappings, then enrolls the student
+                        into the corresponding classrooms.
+                    </p>
+
+                </div>
+
+                <button type="submit"
+                        class="btn-submit">
+
+                    Approve &amp; Complete Enrollment
+
+                </button>
+
+            </form>
+        }
+
+    </div>
+
+</div>

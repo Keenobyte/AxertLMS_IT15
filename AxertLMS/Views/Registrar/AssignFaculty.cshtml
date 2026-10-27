@@ -1,0 +1,370 @@
+﻿```cshtml
+@{
+    ViewData["Title"] = "Assign Faculty to Classroom";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --surface: #20242a;
+        --surface-soft: #1b1e23;
+        --text: #f7f8fa;
+        --muted: #9da6b5;
+        --line: #363d47;
+        --blue: #4f93e6;
+        --green: #34d399;
+        --red: #fb7185;
+    }
+
+    .faculty-assignment-page {
+        max-width: 920px;
+        margin: 0 auto;
+        color: var(--text);
+    }
+
+    .faculty-header {
+        margin-bottom: 1.8rem;
+    }
+
+    .eyebrow {
+        color: #83b7ff;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-weight: 800;
+        margin: 0 0 .5rem;
+    }
+
+    .faculty-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: -.035em;
+    }
+
+    .faculty-header > p:last-child {
+        color: var(--muted);
+        margin: .55rem 0 0;
+        line-height: 1.5;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .card-heading {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .card-copy {
+        color: var(--muted);
+        margin: .38rem 0 1.25rem;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    .assignment-note {
+        display: flex;
+        align-items: flex-start;
+        gap: .65rem;
+        color: var(--muted);
+        background: var(--surface-soft);
+        border-radius: 8px;
+        padding: .8rem .9rem;
+        font-size: .84rem;
+        line-height: 1.45;
+        margin-bottom: 1.25rem;
+    }
+
+        .assignment-note i {
+            color: #83b7ff;
+            margin-top: .1rem;
+        }
+
+    .field {
+        margin-bottom: 1.25rem;
+    }
+
+        .field:last-of-type {
+            margin-bottom: 1.35rem;
+        }
+
+    label {
+        display: block;
+        color: #c9d1dc;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        margin-bottom: .5rem;
+    }
+
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        background: #17191d !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px;
+        padding: .83rem .9rem;
+        font: inherit;
+    }
+
+        select:focus {
+            outline: none !important;
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(79,147,230,.14) !important;
+        }
+
+        select option {
+            background: #17191d;
+            color: var(--text);
+        }
+
+    .help {
+        color: var(--muted);
+        font-size: .82rem;
+        margin: .45rem 0 0;
+        line-height: 1.45;
+    }
+
+    .submit {
+        width: 100%;
+        padding: .95rem 1rem;
+        border: 1px solid #47a886;
+        color: #fff;
+        background: linear-gradient(135deg,#167454,#0e513d);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter .2s ease;
+    }
+
+        .submit:hover {
+            filter: brightness(1.12);
+        }
+
+    .message {
+        border-radius: 9px;
+        padding: .9rem 1rem;
+        margin-bottom: 1rem;
+        font-size: .9rem;
+    }
+
+    .success {
+        color: #a7f3d0;
+        background: rgba(52,211,153,.1);
+        border: 1px solid rgba(52,211,153,.3);
+    }
+
+    .error {
+        color: #fecdd3;
+        background: rgba(251,113,133,.1);
+        border: 1px solid rgba(251,113,133,.3);
+    }
+
+    .assignment-flow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .flow-item {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: .8rem;
+    }
+
+    .flow-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(79,147,230,.12);
+        color: #9fc8ff;
+        font-size: .72rem;
+        font-weight: 800;
+        margin-bottom: .45rem;
+    }
+
+    .flow-title {
+        display: block;
+        color: var(--text);
+        font-size: .82rem;
+        font-weight: 700;
+    }
+
+    .flow-copy {
+        display: block;
+        color: var(--muted);
+        font-size: .75rem;
+        line-height: 1.35;
+        margin-top: .15rem;
+    }
+
+    @@media (max-width: 640px) {
+        .faculty-header h1 {
+            font-size: 1.7rem;
+        }
+
+        .card {
+            padding: 1.1rem;
+        }
+
+        .assignment-flow {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<main class="faculty-assignment-page">
+
+    <header class="faculty-header">
+        <p class="eyebrow">Registrar workspace</p>
+        <h1>Assign faculty to classroom</h1>
+        <p>Link a faculty member to a subject and academic section to create a classroom.</p>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="message success">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="message error">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <section class="card">
+
+        <h2 class="card-heading">Create classroom assignment</h2>
+
+        <p class="card-copy">
+            Select the faculty member, subject, and section that will make up the classroom.
+        </p>
+
+        <div class="assignment-flow">
+
+            <div class="flow-item">
+                <span class="flow-number">1</span>
+                <span class="flow-title">Faculty</span>
+                <span class="flow-copy">Choose the teacher responsible for the class.</span>
+            </div>
+
+            <div class="flow-item">
+                <span class="flow-number">2</span>
+                <span class="flow-title">Subject</span>
+                <span class="flow-copy">Choose the subject that will be taught.</span>
+            </div>
+
+            <div class="flow-item">
+                <span class="flow-number">3</span>
+                <span class="flow-title">Section</span>
+                <span class="flow-copy">Choose the academic section receiving the class.</span>
+            </div>
+
+        </div>
+
+        <div class="assignment-note">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>
+                A section can only have one classroom assignment for the same subject.
+                Creating a duplicate assignment will be blocked by the system.
+            </span>
+        </div>
+
+        <form asp-action="AssignFaculty" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div class="field">
+                <label for="teacher_id">SELECT FACULTY</label>
+
+                <select id="teacher_id" name="teacher_id" required>
+                    <option value="">Select a faculty member</option>
+
+                    @if (ViewBag.Teachers != null)
+                    {
+                        foreach (var teacher in ViewBag.Teachers)
+                        {
+                            <option value="@teacher.teacher_id">
+                                @teacher.User.l_name, @teacher.User.f_name
+                                (@teacher.specialization)
+                            </option>
+                        }
+                    }
+                </select>
+
+                <p class="help">
+                    The selected faculty member will become the teacher assigned to this classroom.
+                </p>
+            </div>
+
+            <div class="field">
+                <label for="subject_id">SELECT SUBJECT</label>
+
+                <select id="subject_id" name="subject_id" required>
+                    <option value="">Select a subject</option>
+
+                    @if (ViewBag.Subjects != null)
+                    {
+                        foreach (var subject in ViewBag.Subjects)
+                        {
+                            <option value="@subject.subject_id">
+                                @subject.subject_name
+                            </option>
+                        }
+                    }
+                </select>
+
+                <p class="help">
+                    The subject determines the academic content taught in this classroom.
+                </p>
+            </div>
+
+            <div class="field">
+                <label for="section_id">SELECT SECTION</label>
+
+                <select id="section_id" name="section_id" required>
+                    <option value="">Select an academic section</option>
+
+                    @if (ViewBag.Sections != null)
+                    {
+                        foreach (AxertLMS.Models.Section sec in ViewBag.Sections)
+                        {
+                            <option value="@sec.section_id">
+                                @sec.section_name · @(sec.Strand?.strand_code ?? "N/A") · Grade @sec.year_lvl
+                            </option>
+                        }
+                    }
+                </select>
+
+                <p class="help">
+                    The assigned section determines which students will belong to the classroom.
+                </p>
+            </div>
+
+            <button type="submit" class="submit">
+                <i class="fa-solid fa-chalkboard-user me-2"></i>
+                Create Classroom Setup
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+```

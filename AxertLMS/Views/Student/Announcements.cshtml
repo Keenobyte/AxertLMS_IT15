@@ -1,0 +1,103 @@
+﻿@model List<AxertLMS.Models.Announcement>
+@{
+    ViewData["Title"] = "Global Announcements";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .feed-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .feed-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .feed-title {
+        color: #FFFFFF;
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    .announcement-card {
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .a-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #2D3748;
+    }
+
+    .a-subject {
+        color: #FFFFFF;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .a-date {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+    }
+
+    .a-body {
+        color: #E2E8F0;
+        line-height: 1.6;
+        white-space: pre-wrap; /* Keeps formatting if teacher uses enters/spaces */
+    }
+
+    .a-author {
+        margin-top: 15px;
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+<div class="feed-container">
+    <div class="feed-header">
+        <h1 class="feed-title">📢 Notice Board</h1>
+        <p style="color: #9CA3AF;">Updates from all your enrolled classes</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 40px; background: #121212; border: 1px solid #2D3748; border-radius: 12px; color: #9CA3AF;">
+            There are no recent announcements.
+        </div>
+    }
+    else
+    {
+        foreach (var ann in Model)
+        {
+            <div class="announcement-card">
+                <div class="a-header">
+                    <div class="a-subject">
+                        <span style="background: #0B1F3A; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                            @ann.Classroom?.Subject?.subject_name
+                        </span>
+                    </div>
+                    <div class="a-date">@ann.created_at.ToString("MMMM dd, yyyy - h:mm tt")</div>
+                </div>
+                <div class="a-body">@ann.message</div>
+                <div class="a-author">
+                    <span>👨‍🏫</span> Posted by @ann.User?.f_name @ann.User?.l_name
+                </div>
+            </div>
+        }
+    }
+</div>

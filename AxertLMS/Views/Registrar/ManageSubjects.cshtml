@@ -1,0 +1,503 @@
+﻿@model IEnumerable<AxertLMS.Models.Subject>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Manage Subjects";
+}
+
+<style>
+    :root {
+        --surface: #20242a;
+        --surface-soft: #1b1e23;
+        --text: #f7f8fa;
+        --muted: #9da6b5;
+        --line: #363d47;
+        --blue: #4f93e6;
+        --green: #34d399;
+        --red: #fb7185;
+    }
+
+    .subjects-page {
+        max-width: 1180px;
+        margin: 0 auto;
+        color: var(--text);
+    }
+
+    .subjects-header {
+        margin-bottom: 1.8rem;
+    }
+
+    .eyebrow {
+        color: #83b7ff;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-weight: 800;
+        margin: 0 0 .5rem;
+    }
+
+    .subjects-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: -.035em;
+    }
+
+    .subjects-header > p:last-child {
+        color: var(--muted);
+        margin: .55rem 0 0;
+    }
+
+    .subjects-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(300px, .9fr);
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .card-heading {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .card-copy {
+        color: var(--muted);
+        margin: .38rem 0 1.25rem;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    .message {
+        border-radius: 9px;
+        padding: .9rem 1rem;
+        margin-bottom: 1rem;
+        font-size: .9rem;
+    }
+
+    .success {
+        color: #a7f3d0;
+        background: rgba(52,211,153,.1);
+        border: 1px solid rgba(52,211,153,.3);
+    }
+
+    .error {
+        color: #fecdd3;
+        background: rgba(251,113,133,.1);
+        border: 1px solid rgba(251,113,133,.3);
+    }
+
+    .scrollable-list {
+        max-height: 68vh;
+        overflow-y: auto;
+        padding-right: .35rem;
+    }
+
+        .scrollable-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb {
+            background: var(--line);
+            border-radius: 10px;
+        }
+
+    .subject-card {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin-bottom: .75rem;
+        overflow: hidden;
+    }
+
+        .subject-card:last-child {
+            margin-bottom: 0;
+        }
+
+    .subject-header {
+        padding: .95rem 1rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255,255,255,.015);
+        transition: background .2s ease;
+    }
+
+        .subject-header:hover {
+            background: rgba(255,255,255,.04);
+        }
+
+    .subject-header-left {
+        min-width: 0;
+    }
+
+    .subject-title {
+        margin: 0;
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--text);
+        word-break: break-word;
+    }
+
+    .subject-subtitle {
+        color: var(--muted);
+        font-size: .78rem;
+        margin-top: .2rem;
+    }
+
+    .subject-badge {
+        flex-shrink: 0;
+        background: rgba(79,147,230,.08);
+        border: 1px solid rgba(79,147,230,.22);
+        color: #b9d9ff;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .28rem .55rem;
+        border-radius: 999px;
+    }
+
+    .accordion-body {
+        padding: 1rem;
+        border-top: 1px solid var(--line);
+    }
+
+    .field {
+        margin-bottom: 1.1rem;
+    }
+
+    label {
+        display: block;
+        color: #c9d1dc;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        margin-bottom: .5rem;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+        box-sizing: border-box;
+        background: #17191d !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px;
+        padding: .83rem .9rem;
+        font: inherit;
+    }
+
+    textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #737d8d;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none !important;
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(79,147,230,.14) !important;
+        }
+
+    .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .55rem;
+        margin-top: 1rem;
+    }
+
+    .btn-update,
+    .btn-remove {
+        border-radius: 8px;
+        padding: .62rem .85rem;
+        font: inherit;
+        font-size: .82rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter .2s ease;
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg,#167454,#0e513d);
+        border: 1px solid #47a886;
+        color: #fff;
+    }
+
+    .btn-remove {
+        background: rgba(251,113,133,.08);
+        border: 1px solid rgba(251,113,133,.35);
+        color: #fecdd3;
+    }
+
+        .btn-update:hover,
+        .btn-remove:hover {
+            filter: brightness(1.12);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted);
+    }
+
+        .empty-state i {
+            opacity: .5;
+            margin-bottom: .9rem;
+        }
+
+    .add-note {
+        display: flex;
+        align-items: flex-start;
+        gap: .65rem;
+        color: var(--muted);
+        background: var(--surface-soft);
+        border-radius: 8px;
+        padding: .8rem .9rem;
+        font-size: .84rem;
+        line-height: 1.45;
+        margin-bottom: 1.25rem;
+    }
+
+        .add-note i {
+            color: #83b7ff;
+            margin-top: .1rem;
+        }
+
+    .submit {
+        width: 100%;
+        padding: .95rem 1rem;
+        border: 1px solid #47a886;
+        color: #fff;
+        background: linear-gradient(135deg,#167454,#0e513d);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter .2s ease;
+    }
+
+        .submit:hover {
+            filter: brightness(1.12);
+        }
+
+    @@media (max-width: 860px) {
+        .subjects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .scrollable-list {
+            max-height: 55vh;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .subjects-header h1 {
+            font-size: 1.7rem;
+        }
+
+        .card {
+            padding: 1.1rem;
+        }
+
+        .subject-header {
+            align-items: flex-start;
+        }
+
+        .subject-badge {
+            margin-top: .05rem;
+        }
+    }
+</style>
+
+<main class="subjects-page">
+    <header class="subjects-header">
+        <p class="eyebrow">Registrar workspace</p>
+        <h1>Manage subjects</h1>
+        <p>Maintain the master subject repository used throughout the academic curriculum.</p>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="message success">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="message error">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="subjects-grid">
+
+        <section class="card">
+            <h2 class="card-heading">Master subject list</h2>
+            <p class="card-copy">
+                Global repository of all subjects. These subjects can be assigned to strands
+                through the Manage Curriculum page.
+            </p>
+
+            <div class="scrollable-list accordion" id="subjectAccordion">
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var sub in Model)
+                    {
+                        <div class="subject-card accordion-item">
+
+                            <div class="subject-header"
+                                 data-bs-toggle="collapse"
+                                 data-bs-target="#collapse_@sub.subject_id"
+                                 aria-expanded="false"
+                                 aria-controls="collapse_@sub.subject_id">
+
+                                <div class="subject-header-left">
+                                    <h3 class="subject-title">
+                                        @sub.subject_name
+                                    </h3>
+
+                                    <div class="subject-subtitle">
+                                        Subject record #@sub.subject_id
+                                    </div>
+                                </div>
+
+                                <span class="subject-badge">
+                                    SUB-@sub.subject_id
+                                </span>
+                            </div>
+
+                            <div id="collapse_@sub.subject_id"
+                                 class="accordion-collapse collapse"
+                                 data-bs-parent="#subjectAccordion">
+
+                                <div class="accordion-body">
+
+                                    <form method="post" action="/Registrar/UpdateSubject">
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="subject_id"
+                                               value="@sub.subject_id" />
+
+                                        <div class="field">
+                                            <label for="subject_name_@sub.subject_id">
+                                                SUBJECT NAME
+                                            </label>
+
+                                            <input id="subject_name_@sub.subject_id"
+                                                   type="text"
+                                                   name="subject_name"
+                                                   value="@sub.subject_name"
+                                                   required />
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="description_@sub.subject_id">
+                                                DESCRIPTION
+                                            </label>
+
+                                            <textarea id="description_@sub.subject_id"
+                                                      name="description"
+                                                      rows="4"
+                                                      placeholder="Brief summary of the course...">@sub.description</textarea>
+                                        </div>
+
+                                        <div class="action-group">
+
+                                            <button type="submit"
+                                                    class="btn-update">
+                                                <i class="fa-solid fa-floppy-disk me-1"></i>
+                                                Update
+                                            </button>
+
+                                            <button type="submit"
+                                                    formaction="/Registrar/RemoveSubject"
+                                                    class="btn-remove"
+                                                    onclick="return confirm('Are you sure you want to permanently delete this subject? This may affect existing curriculums.');">
+                                                <i class="fa-solid fa-trash me-1"></i>
+                                                Remove
+                                            </button>
+
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open fa-3x"></i>
+                        <p>No subjects found in the system.</p>
+                    </div>
+                }
+
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="card-heading">Add new subject</h2>
+            <p class="card-copy">
+                Create a new subject for the master subject repository.
+            </p>
+
+            <div class="add-note">
+                <i class="fa-solid fa-book-open"></i>
+                <span>
+                    Keep the subject name official and recognizable because it may appear
+                    throughout student and curriculum records.
+                </span>
+            </div>
+
+            <form method="post" action="/Registrar/AddSubject">
+                @Html.AntiForgeryToken()
+
+                <div class="field">
+                    <label for="new_subject_name">SUBJECT NAME</label>
+
+                    <input id="new_subject_name"
+                           type="text"
+                           name="subject_name"
+                           placeholder="e.g. General Mathematics"
+                           required />
+                </div>
+
+                <div class="field">
+                    <label for="new_description">SYLLABUS DESCRIPTION</label>
+
+                    <textarea id="new_description"
+                              name="description"
+                              rows="5"
+                              placeholder="Brief summary of the course..."></textarea>
+                </div>
+
+                <button type="submit" class="submit">
+                    <i class="fa-solid fa-plus me-2"></i>
+                    Add Subject
+                </button>
+            </form>
+        </section>
+
+    </div>
+</main>

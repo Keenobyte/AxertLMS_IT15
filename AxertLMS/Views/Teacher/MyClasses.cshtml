@@ -1,0 +1,147 @@
+﻿@model IEnumerable<AxertLMS.Models.Classroom>
+@{
+    ViewData["Title"] = "My Handled Classes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .header-section {
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 15px;
+    }
+
+        .header-section h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+    .dashboard-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        align-items: start;
+    }
+
+    .class-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .class-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,.4);
+            border-color: var(--navy-light);
+        }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--navy-light) 0%, var(--bg-card) 100%);
+        padding: 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        position: relative;
+    }
+
+        .card-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #10B981;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-header p {
+            margin: 8px 0 0;
+            font-size: .85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+    .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .action-btn {
+        display: block;
+        text-align: center;
+        background: transparent;
+        color: var(--text-primary);
+        padding: 10px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        border: 1px solid var(--border-subtle);
+        transition: all .2s ease;
+        margin-top: auto;
+    }
+
+        .action-btn:hover {
+            background: #10B981;
+            border-color: #10B981;
+            color: #fff;
+        }
+
+    .empty-state {
+        color: var(--text-secondary);
+        padding: 30px;
+        border: 1px dashed var(--border-subtle);
+        border-radius: 12px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+</style>
+
+<div class="header-section">
+    <h2>My Handled Classes</h2>
+</div>
+
+<div class="dashboard-layout">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-state">
+            <p style="margin:0;">You have not been assigned to any classes yet.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var c in Model)
+        {
+            <div class="class-card">
+                <div class="card-header">
+                    <h3>@(c.Subject?.subject_name ?? "Subject TBA")</h3>
+                    <p>Section: @(c.Section?.section_name ?? "Unsectioned")</p>
+                </div>
+
+                <div class="card-body">
+                    <p style="color: var(--text-secondary); margin-bottom:20px; font-size:.95rem;">
+                        Track:
+                        @(c.Section?.Strand?.strand_code ?? "N/A")
+                        |
+                        Grade @(c.Section?.year_lvl ?? "N/A")
+                    </p>
+
+                    <a href="/Teacher/ClassroomDetails/@c.classroom_id" class="action-btn">
+                        Manage Class
+                    </a>
+                </div>
+            </div>
+        }
+    }
+</div>

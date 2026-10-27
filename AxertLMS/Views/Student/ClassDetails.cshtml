@@ -1,0 +1,314 @@
+﻿@model AxertLMS.Models.Classroom
+@{
+    ViewData["Title"] = Model.Subject?.subject_name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var announcements = ViewBag.Announcements as List<AxertLMS.Models.Announcement>;
+    var modules = ViewBag.Modules as List<AxertLMS.Models.Module>;
+    var assignments = ViewBag.Assignments as List<AxertLMS.Models.Assignment>;
+    var classmates = ViewBag.Classmates as List<AxertLMS.Models.Student>;
+    var submittedIds = ViewBag.SubmittedAssignmentIds as List<int> ?? new List<int>();
+}
+
+<style>
+    /* Premium Header */
+    .class-hero {
+        background: linear-gradient(135deg, #0B1F3A 0%, #121212 100%);
+        border: 1px solid #2D3748;
+        padding: 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+        /* Subtle geometric overlay for texture */
+        .class-hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: radial-gradient(circle at top right, rgba(255,255,255,0.03) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+    .class-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #FFFFFF;
+        margin: 0 0 10px 0;
+        letter-spacing: 0.5px;
+    }
+
+    .class-meta {
+        color: #9CA3AF;
+        font-size: 1.1rem;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    /* Layout Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 30px;
+        align-items: start;
+    }
+
+    /* Content Cards */
+    .section-header {
+        color: #FFFFFF;
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #2D3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card {
+        background-color: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Announcements */
+    .announcement-item {
+        border-bottom: 1px solid #2D3748;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+        .announcement-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+    .author-meta {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .announcement-text {
+        color: #E2E8F0;
+        line-height: 1.6;
+    }
+
+    /* Lists (Modules & Assignments) */
+    .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #1A1A1A;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #2D3748;
+        transition: border-color 0.2s;
+    }
+
+        .list-item:hover {
+            border-color: #0B1F3A;
+        }
+
+    .item-title {
+        color: #FFFFFF;
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+    }
+
+    .item-desc {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+    }
+
+    /* Action Buttons & Badges */
+    .btn-action {
+        background: #0B1F3A;
+        color: #FFFFFF;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: background 0.2s;
+        border: 1px solid #020C1B;
+    }
+
+        .btn-action:hover {
+            background: #112d52;
+        }
+
+    .badge-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10B981; /* Green */
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        border: 1px solid #10B981;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Sidebar Roster */
+    .roster-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #2D3748;
+        color: #E2E8F0;
+    }
+
+        .roster-item:last-child {
+            border-bottom: none;
+        }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        background: #2D3748;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #9CA3AF;
+        font-size: 0.8rem;
+    }
+
+    .teacher-badge {
+        font-size: 0.7rem;
+        background: #0B1F3A;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: auto;
+    }
+</style>
+
+<div class="class-hero">
+    <h1 class="class-title">@Model.Subject?.subject_name</h1>
+    <div class="class-meta">
+        <span>👨‍🏫 @Model.Teacher?.User?.f_name @Model.Teacher?.User?.l_name</span>
+        <span>|</span>
+        <span>🏷️ Section @Model.Section?.section_name</span>
+    </div>
+</div>
+
+<div class="content-grid">
+    <div class="main-column">
+
+        <h2 class="section-header"><span>📢</span> Announcements</h2>
+        <div class="card">
+            @if (announcements == null || !announcements.Any())
+            {
+                <div class="item-desc" style="text-align: center; padding: 20px;">No new announcements from your instructor.</div>
+            }
+            else
+            {
+                foreach (var ann in announcements)
+                {
+                    <div class="announcement-item">
+                        <div class="author-meta">
+                            <strong>@ann.User?.f_name @ann.User?.l_name</strong> posted on @ann.created_at.ToString("MMM dd, yyyy h:mm tt")
+                        </div>
+                        <div class="announcement-text">@ann.message</div>
+                    </div>
+                }
+            }
+        </div>
+
+        <h2 class="section-header"><span>📚</span> Learning Modules</h2>
+        <div class="card" style="padding: 10px;">
+            @if (modules == null || !modules.Any())
+            {
+                <div class="item-desc" style="text-align: center; padding: 20px;">No modules uploaded yet.</div>
+            }
+            else
+            {
+                foreach (var mod in modules)
+                {
+                    <div class="list-item">
+                        <div>
+                            <div class="item-title">@mod.title</div>
+                            <div class="item-desc">@mod.description</div>
+                        </div>
+                        <a href="@mod.file_path" target="_blank" class="btn-action">View File</a>
+                    </div>
+                }
+            }
+        </div>
+
+        <h2 class="section-header"><span>📝</span> Assignments</h2>
+        <div class="card" style="padding: 10px;">
+            @if (assignments == null || !assignments.Any())
+            {
+                <div class="item-desc" style="text-align: center; padding: 20px;">Hooray! No pending assignments.</div>
+            }
+            else
+            {
+                foreach (var task in assignments)
+                {
+                    bool isSubmitted = submittedIds.Contains(task.assignment_id);
+
+                    <div class="list-item">
+                        <div>
+                            <div class="item-title">@task.title</div>
+                            <div class="item-desc">Due: @task.due_date.ToString("dddd, MMMM dd, yyyy 'at' h:mm tt")</div>
+                        </div>
+
+                        @if (isSubmitted)
+                        {
+                            <span class="badge-success">✓ Turned In</span>
+                        }
+                        else
+                        {
+                            <a href="/Student/SubmitAssignment/@task.assignment_id" class="btn-action">Submit Work</a>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="side-column">
+        <h2 class="section-header"><span>👥</span> People</h2>
+        <div class="card">
+
+            <div class="roster-item" style="border-bottom: 2px solid #2D3748; padding-bottom: 15px; margin-bottom: 5px;">
+                <div class="avatar" style="background: #0B1F3A; color: white;">T</div>
+                <div>@Model.Teacher?.User?.f_name @Model.Teacher?.User?.l_name</div>
+                <span class="teacher-badge">Instructor</span>
+            </div>
+
+            <div class="item-desc" style="margin: 15px 0 10px 0; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px;">Classmates</div>
+
+            @if (classmates != null)
+            {
+                foreach (var student in classmates)
+                {
+                    // Don't show the teacher again if they somehow got into this list, or skip formatting issues
+                    if (student.User != null)
+                    {
+                        <div class="roster-item">
+                            <div class="avatar">@student.User.f_name.Substring(0, 1)</div>
+                            <div>@student.User.f_name @student.User.l_name</div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>

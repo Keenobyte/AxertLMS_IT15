@@ -1,0 +1,540 @@
+﻿@model AxertLMS.Models.ManageCurriculumViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Manage Curriculum";
+}
+
+<style>
+    :root {
+        --surface: #20242a;
+        --surface-soft: #1b1e23;
+        --text: #f7f8fa;
+        --muted: #9da6b5;
+        --line: #363d47;
+        --blue: #4f93e6;
+        --green: #34d399;
+        --red: #fb7185;
+    }
+
+    .curriculum-page {
+        max-width: 1180px;
+        margin: 0 auto;
+        color: var(--text);
+    }
+
+    .curriculum-header {
+        margin-bottom: 1.8rem;
+    }
+
+    .eyebrow {
+        color: #83b7ff;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-weight: 800;
+        margin: 0 0 .5rem;
+    }
+
+    .curriculum-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: -.035em;
+    }
+
+    .curriculum-header > p:last-child {
+        color: var(--muted);
+        margin: .55rem 0 0;
+    }
+
+    .curriculum-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, .9fr) minmax(0, 1.7fr);
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .card-heading {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .card-copy {
+        color: var(--muted);
+        margin: .38rem 0 1.25rem;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    .card-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .15rem;
+    }
+
+    .field {
+        margin-bottom: 1.2rem;
+    }
+
+    label {
+        display: block;
+        color: #c9d1dc;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        margin-bottom: .5rem;
+    }
+
+    input,
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        background: #17191d !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px;
+        padding: .83rem .9rem;
+        font: inherit;
+    }
+
+        input:focus,
+        select:focus {
+            outline: none !important;
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(79,147,230,.14) !important;
+        }
+
+        select option {
+            background: #17191d;
+            color: var(--text);
+        }
+
+        input:disabled,
+        select:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+    .divider {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 1.25rem 0;
+    }
+
+    .help {
+        color: var(--muted);
+        font-size: .82rem;
+        margin: .45rem 0 0;
+        line-height: 1.45;
+    }
+
+    .submit {
+        width: 100%;
+        padding: .95rem 1rem;
+        border: 1px solid #47a886;
+        color: #fff;
+        background: linear-gradient(135deg,#167454,#0e513d);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter .2s ease, opacity .2s ease;
+    }
+
+        .submit:hover:not(:disabled) {
+            filter: brightness(1.12);
+        }
+
+        .submit:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+    .path-note {
+        display: flex;
+        align-items: flex-start;
+        gap: .65rem;
+        color: var(--muted);
+        background: var(--surface-soft);
+        border-radius: 8px;
+        padding: .8rem .9rem;
+        font-size: .84rem;
+        line-height: 1.45;
+        margin-bottom: 1.25rem;
+    }
+
+        .path-note i {
+            color: #83b7ff;
+            margin-top: .1rem;
+        }
+
+    .loading-indicator {
+        color: #b9d9ff;
+    }
+
+    .subject-list {
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .empty-state {
+        margin: auto;
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--muted);
+    }
+
+        .empty-state i {
+            opacity: .5;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: .35rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: .84rem;
+            line-height: 1.5;
+        }
+
+    .subject-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        background: rgba(255,255,255,.04);
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: .58rem .8rem;
+        border-radius: 9px;
+        margin: 0 .45rem .45rem 0;
+        font-size: .84rem;
+        transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+        .subject-chip:hover {
+            background: rgba(255,255,255,.07);
+            border-color: #4a5462;
+            transform: translateY(-1px);
+        }
+
+        .subject-chip i {
+            color: #9fc8ff;
+        }
+
+    .message {
+        border-radius: 9px;
+        padding: .9rem 1rem;
+        margin-bottom: 1rem;
+        font-size: .9rem;
+    }
+
+    .success {
+        color: #a7f3d0;
+        background: rgba(52,211,153,.1);
+        border: 1px solid rgba(52,211,153,.3);
+    }
+
+    .error {
+        color: #fecdd3;
+        background: rgba(251,113,133,.1);
+        border: 1px solid rgba(251,113,133,.3);
+    }
+
+    .ajax-error {
+        color: #fecdd3;
+        background: rgba(251,113,133,.1);
+        border: 1px solid rgba(251,113,133,.3);
+        border-radius: 9px;
+        padding: .9rem 1rem;
+        font-size: .88rem;
+    }
+
+    @@media (max-width: 860px) {
+        .curriculum-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .subject-list {
+            min-height: 260px;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .curriculum-header h1 {
+            font-size: 1.7rem;
+        }
+
+        .card {
+            padding: 1.1rem;
+        }
+    }
+</style>
+
+<main class="curriculum-page">
+    <header class="curriculum-header">
+        <p class="eyebrow">Registrar workspace</p>
+        <h1>Manage curriculum</h1>
+        <p>Assign and review subjects specific to academic strands and grade levels.</p>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="message success">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="message error">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="curriculum-grid">
+
+        <section class="card">
+            <h2 class="card-heading">Configure curriculum path</h2>
+            <p class="card-copy">
+                Choose the strand and grade level before assigning a subject to the curriculum.
+            </p>
+
+            <div class="path-note">
+                <i class="fa-solid fa-route"></i>
+                <span>Selecting a path will load the subjects currently assigned to that strand and grade level.</span>
+            </div>
+
+            <form asp-action="MapSubjectToCurriculum" asp-controller="Registrar" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="field">
+                    <label for="strandSelect">ACADEMIC STRAND</label>
+                    <select id="strandSelect" name="strandId" required>
+                        <option value="" selected disabled>Select an academic strand</option>
+
+                        @if (Model?.Strands != null)
+                        {
+                            foreach (var strand in Model.Strands)
+                            {
+                                <option value="@strand.strand_id">
+                                    @strand.strand_id - @(strand.strand_code ?? "No Code")
+                                </option>
+                            }
+                        }
+                    </select>
+                    <p class="help">The selected strand determines which curriculum path you are editing.</p>
+                </div>
+
+                <div class="field">
+                    <label for="gradeSelect">GRADE LEVEL</label>
+                    <select id="gradeSelect" name="yearLevel" required disabled>
+                        <option value="" selected disabled>Select a grade level</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+
+                <hr class="divider" />
+
+                <div class="field">
+                    <label for="subjectSelect">ASSIGN NEW SUBJECT</label>
+                    <select id="subjectSelect" name="subjectId" required disabled>
+                        <option value="" selected disabled>Select a subject</option>
+
+                        @if (Model?.Subjects != null)
+                        {
+                            foreach (var subject in Model.Subjects)
+                            {
+                                <option value="@subject.subject_id">
+                                    @subject.subject_name
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" id="btnAssign" class="submit" disabled>
+                    <i class="fa-solid fa-link me-2"></i>
+                    Map Subject to Curriculum
+                </button>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="card-header-row">
+                <div>
+                    <h2 class="card-heading">Laid subjects</h2>
+                    <p class="card-copy">
+                        Subjects already assigned to the selected curriculum path.
+                    </p>
+                </div>
+
+                <span id="loadingIndicator"
+                      class="loading-indicator"
+                      style="display:none;"
+                      role="status"
+                      aria-label="Loading curriculum">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </span>
+            </div>
+
+            <div class="subject-list" id="subjectListContainer">
+                <div class="empty-state">
+                    <i class="fa-solid fa-arrow-pointer fa-3x"></i>
+                    <h3>No path selected</h3>
+                    <p>Select a strand and grade level to view the currently assigned curriculum map.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const strandSelect = document.getElementById('strandSelect');
+            const gradeSelect = document.getElementById('gradeSelect');
+            const subjectSelect = document.getElementById('subjectSelect');
+            const btnAssign = document.getElementById('btnAssign');
+            const container = document.getElementById('subjectListContainer');
+            const loader = document.getElementById('loadingIndicator');
+
+            strandSelect.addEventListener('change', function() {
+                if (this.value) {
+                    gradeSelect.disabled = false;
+                } else {
+                    gradeSelect.disabled = true;
+                    gradeSelect.value = "";
+                    resetDownstream();
+                }
+            });
+
+            gradeSelect.addEventListener('change', function() {
+
+                const strandId = strandSelect.value;
+                const yearLvl = this.value;
+
+                if (strandId && yearLvl) {
+                    subjectSelect.disabled = false;
+                    btnAssign.disabled = false;
+
+                    fetchCurriculum(strandId, yearLvl);
+                } else {
+                    resetDownstream();
+                }
+            });
+
+            function fetchCurriculum(strandId, yearLvl) {
+
+                loader.style.display = 'inline-block';
+
+                container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-spinner fa-spin fa-3x"></i>
+                                <h3>Loading curriculum</h3>
+                                <p>Retrieving the subjects assigned to this academic path.</p>
+                            </div>
+                        `;
+
+                fetch(`/Registrar/GetSubjectsForCurriculum?strandId=${encodeURIComponent(strandId)}&yearLevel=${encodeURIComponent(yearLvl)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Unable to retrieve curriculum data.');
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        loader.style.display = 'none';
+
+                        if (!data || data.length === 0) {
+
+                            container.innerHTML = `
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-folder-open fa-3x"></i>
+                                            <h3>Curriculum is empty</h3>
+                                            <p>
+                                                There are currently no subjects assigned to this strand and grade level.
+                                                Use the form on the left to assign one.
+                                            </p>
+                                        </div>
+                                    `;
+
+                            return;
+                        }
+
+                        let chipsHtml = '<div>';
+
+                        data.forEach(sub => {
+                            chipsHtml += `
+                                        <div class="subject-chip">
+                                            <i class="fa-solid fa-book-open-reader"></i>
+                                            <span>${escapeHtml(sub.name)}</span>
+                                        </div>
+                                    `;
+                        });
+
+                        chipsHtml += '</div>';
+
+                        container.innerHTML = chipsHtml;
+                    })
+                    .catch(error => {
+
+                        console.error(error);
+
+                        loader.style.display = 'none';
+
+                        container.innerHTML = `
+                                    <div class="ajax-error">
+                                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+                                        Error fetching curriculum data. Please try again.
+                                    </div>
+                                `;
+                    });
+            }
+
+            function resetDownstream() {
+
+                subjectSelect.disabled = true;
+                subjectSelect.value = "";
+
+                btnAssign.disabled = true;
+
+                container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-arrow-pointer fa-3x"></i>
+                                <h3>No path selected</h3>
+                                <p>Select a strand and grade level to view the currently assigned curriculum map.</p>
+                            </div>
+                        `;
+            }
+
+            function escapeHtml(value) {
+
+                const div = document.createElement('div');
+                div.textContent = value ?? '';
+
+                return div.innerHTML;
+            }
+        });
+    </script>
+}

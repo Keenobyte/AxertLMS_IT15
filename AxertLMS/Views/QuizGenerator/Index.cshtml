@@ -1,0 +1,163 @@
+﻿@model IEnumerable<AxertLMS.Models.Quiz>
+
+@{
+    ViewData["Title"] = "My Quizzes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .quiz-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .quiz-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+        .quiz-page-header h1 {
+            margin: 0 0 6px;
+            font-size: 2rem;
+        }
+
+    .quiz-muted {
+        color: var(--text-secondary);
+    }
+
+    .quiz-table-wrapper {
+        overflow-x: auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+    }
+
+    .quiz-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+        .quiz-table th,
+        .quiz-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: middle;
+        }
+
+        .quiz-table th {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quiz-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+    .quiz-button {
+        display: inline-block;
+        padding: 9px 13px;
+        border-radius: 6px;
+        background: #3B82F6;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
+
+    .quiz-empty {
+        padding: 40px 20px;
+        text-align: center;
+        background: var(--bg-card);
+        border: 1px dashed var(--border-subtle);
+        border-radius: 10px;
+    }
+
+        .quiz-empty h2 {
+            margin-top: 0;
+        }
+</style>
+
+<div class="quiz-page">
+    <div class="quiz-page-header">
+        <div>
+            <h1>My Quizzes</h1>
+            <p class="quiz-muted">
+                View saved quizzes and their question sets.
+            </p>
+        </div>
+
+        <a href="/Teacher/MyClasses" class="quiz-button">
+            Go to My Classes
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="quiz-empty">
+            <h2>No quizzes yet</h2>
+            <p class="quiz-muted">
+                Open one of your classrooms and generate a quiz from a module.
+            </p>
+            <a href="/Teacher/MyClasses" class="quiz-button">
+                Open My Classes
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="quiz-table-wrapper">
+            <table class="quiz-table">
+                <thead>
+                    <tr>
+                        <th>Quiz</th>
+                        <th>Subject</th>
+                        <th>Module</th>
+                        <th>Difficulty</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var quiz in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@quiz.title</strong>
+                            </td>
+
+                            <td>
+                                @(quiz.Classroom?.Subject?.subject_name ?? "—")
+                            </td>
+
+                            <td>
+                                @(quiz.Module?.title ?? "—")
+                            </td>
+
+                            <td>@quiz.difficulty</td>
+
+                            <td>
+                                @quiz.created_at.ToLocalTime().ToString("MMM dd, yyyy")
+                            </td>
+
+                            <td>
+                                <a class="quiz-button"
+                                   href="@Url.Action("QuizDetails", "QuizGenerator", new { id = quiz.quiz_id })">
+                                    View Questions
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,61 @@
+﻿@model AxertLMS.Models.Quiz
+
+@{
+    ViewData["Title"] = "Generated Evaluation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+
+    <div style="margin-bottom: 30px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 20px;">
+        <a href="/Teacher/Dashboard" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-arrow-left"></i> Return to Workspace
+        </a>
+        <h1 style="font-size: 2.4rem; font-weight: 800; margin: 15px 0 5px 0; color: var(--text-primary);">@Model.title</h1>
+        <p style="color: var(--text-secondary); margin: 0; font-weight: 500;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #3B82F6; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 10px;">
+                @Model.difficulty System Generated
+            </span>
+            Created on @Model.created_at.ToString("MMMM dd, yyyy")
+        </p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        @if (Model.Questions == null || !Model.Questions.Any())
+        {
+            <p style="color: var(--text-secondary); text-align: center;">No raw fields found for this evaluation token record.</p>
+        }
+        else
+        {
+            int count = 1;
+            foreach (var q in Model.Questions)
+            {
+                <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-weight: bold; color: #10B981; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">
+                            Item @count &bull; @q.question_type
+                        </span>
+                    </div>
+
+                    <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0 0 16px 0; line-height: 1.4;">@q.question_text</p>
+
+                    @if (q.question_type == "Multiple Choice")
+                    {
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+                            <div style="padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.9rem;"><strong>A.</strong> @q.option_a</div>
+                            <div style="padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.9rem;"><strong>B.</strong> @q.option_b</div>
+                            <div style="padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.9rem;"><strong>C.</strong> @q.option_c</div>
+                            <div style="padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.9rem;"><strong>D.</strong> @q.option_d</div>
+                        </div>
+                    }
+
+                    <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10B981; padding: 10px 14px; border-radius: 0 6px 6px 0;">
+                        <span style="font-size: 0.85rem; color: #10B981; font-weight: 700; display: block; text-transform: uppercase; margin-bottom: 2px;">Correct Answer Key</span>
+                        <span style="font-weight: 600; color: var(--text-primary);">@q.correct_answer</span>
+                    </div>
+                </div>
+                count++;
+            }
+        }
+    </div>
+</div>

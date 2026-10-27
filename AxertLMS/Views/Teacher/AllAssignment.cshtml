@@ -1,0 +1,164 @@
+﻿@model IEnumerable<AxertLMS.Models.Assignment>
+@{
+    ViewData["Title"] = "Master Assignment List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var groupedAssignments = Model
+        .Where(a => a.Classroom != null)
+        .GroupBy(a => $"{a.Classroom?.Subject?.subject_name} ({a.Classroom?.Section?.section_name})")
+        .OrderBy(g => g.Key);
+}
+
+<style>
+    .master-header-section {
+        margin-bottom: 25px;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 15px;
+    }
+
+        .master-header-section h2 {
+            margin: 0 0 5px 0;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .master-header-section p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+    .classroom-group {
+        margin-bottom: 35px;
+    }
+
+    .classroom-header {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--navy-dark);
+        display: inline-block;
+    }
+
+    .assignment-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+
+        .assignment-card:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+    .card-content-left {
+        flex: 1;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 4px 0;
+    }
+
+    .category-badge {
+        background-color: var(--navy-light);
+        color: #FFFFFF;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 10px;
+        text-transform: uppercase;
+    }
+
+    .due-date-container {
+        color: #F59E0B;
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .card-actions-right {
+        margin-left: 30px;
+    }
+
+    .view-details-link {
+        color: #3B82F6;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+        border: 1px solid transparent;
+        padding: 8px 15px;
+        border-radius: 6px;
+    }
+
+        .view-details-link:hover {
+            color: #60A5FA;
+            border-color: rgba(59, 130, 246, 0.3);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+</style>
+
+<div class="master-header-section">
+    <h2>Master Assignment List</h2>
+    <p>Overview of coursework across all your classes.</p>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div style="padding: 40px; text-align: center; border: 1px dashed var(--border-subtle); border-radius: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.01);">
+        <h3 style="margin-bottom: 10px; font-weight: 500;">No assignments created yet.</h3>
+        <p style="font-size: 0.9rem;">Start creating assignments within your individual classrooms.</p>
+    </div>
+}
+else
+{
+    foreach (var group in groupedAssignments)
+    {
+        <div class="classroom-group">
+            <h3 class="classroom-header">@group.Key</h3>
+
+            @foreach (var item in group.OrderByDescending(a => a.due_date))
+            {
+                <div class="assignment-card">
+
+                    <div class="card-content-left">
+                        <div style="display: flex; align-items: center;">
+                            <h4 class="card-title">@item.title</h4>
+                            @if (!string.IsNullOrEmpty(item.Category))
+                            {
+                                <span class="category-badge">@item.Category</span>
+                            }
+                        </div>
+
+                        <div class="due-date-container">
+                            <i class="bi bi-calendar3"></i>
+                            <span>Due: @item.due_date.ToString("MMM dd, yyyy - hh:mm tt")</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions-right">
+                        <a href="@Url.Action("AssignmentDetails", "Teacher", new { id = item.assignment_id })" class="view-details-link">
+                            View Details <i class="bi bi-chevron-right" style="font-size: 0.8rem;"></i>
+                        </a>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+}

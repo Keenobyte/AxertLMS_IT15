@@ -1,0 +1,447 @@
+﻿@* File: AxertLMS/Views/Teacher/Dashboard.cshtml *@
+
+@model IEnumerable<AxertLMS.Models.Classroom>
+
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var classrooms = Model?.ToList()
+        ?? new List<AxertLMS.Models.Classroom>();
+
+    string teacherName = ViewBag.TeacherName as string ?? "Teacher";
+
+    int totalUngraded = ViewBag.TotalUngraded is int ungraded
+        ? ungraded
+        : 0;
+
+    int totalStudents = ViewBag.TotalStudents is int studentCount
+        ? studentCount
+        : 0;
+
+    var chartLabels = ViewBag.ChartLabels as List<string>
+        ?? new List<string>();
+
+    var chartData = ViewBag.ChartData as List<double>
+        ?? new List<double>();
+
+    int chartCount = Math.Min(chartLabels.Count, chartData.Count);
+
+    bool hasGradeData = chartData.Any(score => score > 0);
+}
+
+<style>
+    .teacher-dashboard {
+        max-width: 1500px;
+        margin: 0 auto;
+        color: #F9FAFB;
+    }
+
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 22px;
+        margin-bottom: 28px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid #2D3748;
+    }
+
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .dashboard-header p {
+            margin: 8px 0 0;
+            color: #9CA3AF;
+            line-height: 1.6;
+        }
+
+    .dashboard-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border: 1px solid #374151;
+        border-radius: 7px;
+        background: #1A1A1A;
+        color: #F9FAFB;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .dashboard-button:hover {
+            background: #273449;
+            color: #FFFFFF;
+        }
+
+    .dashboard-button-primary {
+        background: #1D4ED8;
+        border-color: #1D4ED8;
+    }
+
+        .dashboard-button-primary:hover {
+            background: #1E40AF;
+        }
+
+    .dashboard-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .dashboard-metric {
+        min-width: 0;
+        padding: 22px;
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 10px;
+    }
+
+    .metric-label {
+        display: block;
+        color: #9CA3AF;
+        font-size: 0.82rem;
+        font-weight: 650;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+    }
+
+    .metric-number {
+        margin: 12px 0 5px;
+        color: #FFFFFF;
+        font-size: 2.5rem;
+        line-height: 1.1;
+        font-weight: 750;
+    }
+
+    .metric-description {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .dashboard-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        align-items: start;
+        gap: 22px;
+    }
+
+    .dashboard-panel {
+        min-width: 0;
+        padding: 22px;
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 10px;
+    }
+
+        .dashboard-panel h2 {
+            margin: 0 0 20px;
+            font-size: 1.15rem;
+            font-weight: 650;
+        }
+
+    .dashboard-class-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dashboard-class {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 16px;
+        border: 1px solid #2D3748;
+        border-radius: 8px;
+        background: #1A1A1A;
+        text-decoration: none;
+    }
+
+        .dashboard-class:hover {
+            border-color: #64748B;
+            background: #20242B;
+        }
+
+    .dashboard-class-info {
+        min-width: 0;
+    }
+
+        .dashboard-class-info h3 {
+            margin: 0 0 6px;
+            color: #FFFFFF;
+            font-size: 1rem;
+            overflow-wrap: anywhere;
+        }
+
+        .dashboard-class-info p {
+            margin: 0;
+            color: #9CA3AF;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+    .dashboard-arrow {
+        flex-shrink: 0;
+        color: #9CA3AF;
+        font-size: 1.2rem;
+    }
+
+    .dashboard-empty {
+        padding: 24px 16px;
+        border: 1px dashed #374151;
+        border-radius: 8px;
+        color: #9CA3AF;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .performance-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .performance-item {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .performance-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.88rem;
+    }
+
+    .performance-label {
+        color: #E5E7EB;
+        overflow-wrap: anywhere;
+    }
+
+    .performance-score {
+        flex-shrink: 0;
+        color: #F9FAFB;
+        font-weight: 700;
+    }
+
+    .performance-track {
+        height: 10px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #293140;
+    }
+
+    .performance-bar {
+        height: 100%;
+        border-radius: inherit;
+        background: #3B82F6;
+    }
+
+    .dashboard-note {
+        margin-top: 20px;
+        color: #9CA3AF;
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    @@media (max-width: 1050px) {
+        .dashboard-main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .dashboard-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .dashboard-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-metric {
+            padding: 18px;
+        }
+
+        .dashboard-panel {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="teacher-dashboard">
+    <header class="dashboard-header">
+        <div>
+            <h1>Welcome back, @teacherName</h1>
+            <p>
+                Review your classrooms, student counts, and grading workload.
+            </p>
+        </div>
+
+        @if (totalUngraded > 0)
+        {
+            <a href="@Url.Action("GradingCenter", "Teacher")"
+               class="dashboard-button dashboard-button-primary">
+                Review @totalUngraded Submissions
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("MyClasses", "Teacher")"
+               class="dashboard-button">
+                Open My Classes
+            </a>
+        }
+    </header>
+
+    <section class="dashboard-metrics" aria-label="Teaching statistics">
+        <article class="dashboard-metric">
+            <span class="metric-label">Assigned Classrooms</span>
+            <div class="metric-number">@classrooms.Count</div>
+            <div class="metric-description">
+                Classrooms assigned to your account
+            </div>
+        </article>
+
+        <article class="dashboard-metric">
+            <span class="metric-label">Total Students</span>
+            <div class="metric-number">@totalStudents</div>
+            <div class="metric-description">
+                Unique students across your classrooms
+            </div>
+        </article>
+
+        <article class="dashboard-metric">
+            <span class="metric-label">Needs Grading</span>
+            <div class="metric-number">@totalUngraded</div>
+            <div class="metric-description">
+                @if (totalUngraded > 0)
+                {
+                    <text>Submissions waiting for evaluation</text>
+                }
+                else
+                {
+                    <text>No submissions are waiting for grading</text>
+                }
+            </div>
+        </article>
+    </section>
+
+    <div class="dashboard-main-grid">
+        <section class="dashboard-panel">
+            <h2>My Classrooms</h2>
+
+            @if (!classrooms.Any())
+            {
+                <div class="dashboard-empty">
+                    No classrooms are assigned to your account yet.
+                    Contact your registrar if this is unexpected.
+                </div>
+            }
+            else
+            {
+                <div class="dashboard-class-list">
+                    @foreach (var classroom in classrooms)
+                    {
+                        <a href="@Url.Action(
+                                                           "ClassroomDetails",
+                                                           "Teacher",
+                                                           new { id = classroom.classroom_id })"
+                           class="dashboard-class">
+
+                            <div class="dashboard-class-info">
+                                <h3>
+                                    @(classroom.Subject?.subject_name
+                                        ?? "Subject not assigned")
+                                </h3>
+
+                                <p>
+                                    Section:
+                                    @(classroom.Section?.section_name
+                                        ?? "Unassigned")
+                                </p>
+
+                                <p>
+                                    Grade:
+                                    @(classroom.Section?.year_lvl
+                                        ?? "N/A")
+                                </p>
+                            </div>
+
+                            <span class="dashboard-arrow" aria-hidden="true">
+                                →
+                            </span>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="dashboard-panel">
+            <h2>Class Performance</h2>
+
+            @if (chartCount == 0 || !hasGradeData)
+            {
+                <div class="dashboard-empty">
+                    Grade performance will appear when assessment scores
+                    have been recorded.
+                </div>
+            }
+            else
+            {
+                <div class="performance-list">
+                    @for (int i = 0; i < chartCount; i++)
+                    {
+                        double score = chartData[i];
+                        double displayScore = Math.Clamp(score, 0, 100);
+
+                        string barWidth = displayScore.ToString(
+                            "0.##",
+                            CultureInfo.InvariantCulture);
+
+                        <div class="performance-item">
+                            <div class="performance-label-row">
+                                <span class="performance-label">
+                                    @chartLabels[i]
+                                </span>
+
+                                <span class="performance-score">
+                                    @score.ToString("0.##") / 100
+                                </span>
+                            </div>
+
+                            <div class="performance-track"
+                                 role="progressbar"
+                                 aria-label="@chartLabels[i] average score"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-valuenow="@displayScore">
+
+                                <div class="performance-bar"
+                                     style="width: @barWidth%;"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <p class="dashboard-note">
+                    Values use the average recorded grade scores supplied
+                    by the teacher dashboard controller.
+                </p>
+            }
+        </section>
+    </div>
+</div>

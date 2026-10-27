@@ -1,0 +1,652 @@
+﻿@* File: AxertLMS/Views/Teacher/ClassroomDetails.cshtml *@
+
+@model AxertLMS.Models.Classroom
+
+@{
+    ViewData["Title"] =
+        (Model.Subject?.subject_name ?? "Classroom") + " Workspace";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var students =
+        ViewBag.EnrolledStudents as IEnumerable<AxertLMS.Models.Student>
+        ?? Enumerable.Empty<AxertLMS.Models.Student>();
+
+    var announcements =
+        ViewBag.Announcements as IEnumerable<AxertLMS.Models.Announcement>
+        ?? Enumerable.Empty<AxertLMS.Models.Announcement>();
+
+    var modules = Model.Modules
+        ?? new List<AxertLMS.Models.Module>();
+
+    var assignments = Model.Assignments
+        ?? new List<AxertLMS.Models.Assignment>();
+}
+
+<style>
+    .teacher-classroom {
+        max-width: 1500px;
+        margin: 0 auto;
+    }
+
+    .classroom-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 26px;
+        margin-bottom: 28px;
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 12px;
+    }
+
+        .classroom-header h1 {
+            margin: 0 0 8px;
+            font-size: 1.8rem;
+        }
+
+        .classroom-header p {
+            margin: 0;
+            color: #9CA3AF;
+            line-height: 1.6;
+        }
+
+    .classroom-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .teacher-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(270px, 1fr);
+        align-items: start;
+        gap: 26px;
+    }
+
+    .teacher-main-column,
+    .teacher-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+        min-width: 0;
+    }
+
+    .teacher-panel {
+        min-width: 0;
+        overflow: hidden;
+        background: #121212;
+        border: 1px solid #2D3748;
+        border-radius: 10px;
+    }
+
+    .teacher-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #2D3748;
+    }
+
+        .teacher-panel-header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 650;
+        }
+
+    .teacher-panel-body {
+        padding: 20px;
+    }
+
+    .teacher-muted {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .teacher-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 13px;
+        border: 1px solid #374151;
+        border-radius: 7px;
+        background: #1A1A1A;
+        color: #E5E7EB;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 650;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .teacher-button:hover {
+            background: #273449;
+            color: #FFFFFF;
+        }
+
+    .teacher-button-primary {
+        background: #2563EB;
+        border-color: #2563EB;
+        color: #FFFFFF;
+    }
+
+        .teacher-button-primary:hover {
+            background: #1D4ED8;
+        }
+
+    .teacher-button-success {
+        background: #047857;
+        border-color: #047857;
+        color: #FFFFFF;
+    }
+
+        .teacher-button-success:hover {
+            background: #065F46;
+        }
+
+    .teacher-button-purple {
+        background: #6D28D9;
+        border-color: #6D28D9;
+        color: #FFFFFF;
+    }
+
+        .teacher-button-purple:hover {
+            background: #5B21B6;
+        }
+
+    .teacher-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .teacher-input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 11px 12px;
+        border: 1px solid #374151;
+        border-radius: 7px;
+        background: #1A1A1A;
+        color: #FFFFFF;
+        font: inherit;
+    }
+
+        .teacher-input:focus {
+            outline: 2px solid #3B82F6;
+            outline-offset: 1px;
+        }
+
+    textarea.teacher-input {
+        resize: vertical;
+        min-height: 95px;
+    }
+
+    .upload-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: end;
+    }
+
+    .teacher-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #D1D5DB;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .teacher-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .teacher-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 15px;
+        border: 1px solid #2D3748;
+        border-radius: 8px;
+        background: #1A1A1A;
+        min-width: 0;
+    }
+
+    .teacher-item-content {
+        min-width: 0;
+        flex: 1;
+        overflow-wrap: anywhere;
+    }
+
+        .teacher-item-content h3 {
+            margin: 0 0 6px;
+            color: #FFFFFF;
+            font-size: 0.98rem;
+            font-weight: 650;
+        }
+
+        .teacher-item-content p {
+            margin: 0 0 7px;
+            color: #9CA3AF;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+    .teacher-item-meta {
+        display: block;
+        margin-top: 8px;
+        color: #9CA3AF;
+        font-size: 0.8rem;
+    }
+
+    .teacher-empty-state {
+        padding: 26px 16px;
+        text-align: center;
+        border: 1px dashed #374151;
+        border-radius: 8px;
+        color: #9CA3AF;
+        line-height: 1.6;
+    }
+
+    .teacher-alert {
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        border: 1px solid #065F46;
+        border-radius: 8px;
+        background: #102A22;
+        color: #A7F3D0;
+    }
+
+    .teacher-student {
+        padding: 12px 0;
+        border-bottom: 1px solid #2D3748;
+    }
+
+        .teacher-student:last-child {
+            border-bottom: 0;
+        }
+
+    .teacher-student-name {
+        margin-bottom: 4px;
+        color: #FFFFFF;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .teacher-student-id {
+        color: #9CA3AF;
+        font-size: 0.8rem;
+    }
+
+    .teacher-chip {
+        display: inline-block;
+        margin-top: 5px;
+        padding: 4px 8px;
+        border: 1px solid #374151;
+        border-radius: 5px;
+        color: #D1D5DB;
+        font-size: 0.75rem;
+    }
+
+    @@media (max-width: 1000px) {
+        .teacher-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .teacher-sidebar {
+            order: 2;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .classroom-header {
+            padding: 18px;
+        }
+
+            .classroom-header h1 {
+                font-size: 1.45rem;
+            }
+
+        .teacher-panel-body {
+            padding: 15px;
+        }
+
+        .upload-row {
+            grid-template-columns: 1fr;
+        }
+
+        .teacher-list-item {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="teacher-classroom">
+    <header class="classroom-header">
+        <div>
+            <h1>@(Model.Subject?.subject_name ?? "Classroom Workspace")</h1>
+
+            <p>
+                Section: @(Model.Section?.section_name ?? "Not assigned")
+                ·
+                Grade @(Model.Section?.year_lvl ?? "N/A")
+            </p>
+        </div>
+
+        <div class="classroom-header-actions">
+            <a href="@Url.Action("MyClasses", "Teacher")"
+               class="teacher-button">
+                My Classes
+            </a>
+
+            <a href="@Url.Action("GradingCenter", "Teacher")"
+               class="teacher-button">
+                Grading Center
+            </a>
+        </div>
+    </header>
+
+    @if (TempData["AssignmentSuccess"] is string successMessage)
+    {
+        <div class="teacher-alert" role="status">
+            @successMessage
+        </div>
+    }
+
+    @if (TempData["Success"] is string generalSuccess)
+    {
+        <div class="teacher-alert" role="status">
+            @generalSuccess
+        </div>
+    }
+
+    @if (TempData["Error"] is string errorMessage)
+    {
+        <div class="teacher-alert"
+             role="alert"
+             style="border-color: #7F1D1D; background: #2B1515; color: #FCA5A5;">
+            @errorMessage
+        </div>
+    }
+
+    <div class="teacher-layout">
+        <main class="teacher-main-column">
+
+            <section class="teacher-panel">
+                <header class="teacher-panel-header">
+                    <h2>Announcements</h2>
+                </header>
+
+                <div class="teacher-panel-body">
+                    <form asp-controller="Teacher"
+                          asp-action="PostAnnouncement"
+                          method="post"
+                          class="teacher-form">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="classroom_id"
+                               value="@Model.classroom_id" />
+
+                        <label for="announcementMessage">
+                            Post an announcement to this classroom
+                        </label>
+
+                        <textarea id="announcementMessage"
+                                  name="message"
+                                  class="teacher-input"
+                                  rows="3"
+                                  maxlength="5000"
+                                  placeholder="Write your announcement..."
+                                  required></textarea>
+
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit"
+                                    class="teacher-button teacher-button-primary">
+                                Publish Announcement
+                            </button>
+                        </div>
+                    </form>
+
+                    <div style="height: 20px;"></div>
+
+                    @if (!announcements.Any())
+                    {
+                        <div class="teacher-empty-state">
+                            No announcements have been published.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="teacher-list">
+                            @foreach (var announcement in announcements)
+                            {
+                                <article class="teacher-list-item">
+                                    <div class="teacher-item-content">
+                                        <p>@announcement.message</p>
+
+                                        <span class="teacher-item-meta">
+                                            Posted @announcement.created_at.ToString("MMM dd, yyyy · hh:mm tt")
+                                            @if (announcement.User != null)
+                                            {
+                                                <text>
+                                                    by @announcement.User.f_name
+                                                    @announcement.User.l_name
+                                                </text>
+                                            }
+                                        </span>
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="teacher-panel">
+                <header class="teacher-panel-header">
+                    <h2>Course Modules</h2>
+                </header>
+
+                <div class="teacher-panel-body">
+                    <form asp-controller="Teacher"
+                          asp-action="UploadModule"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="teacher-form">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="classroom_id"
+                               value="@Model.classroom_id" />
+
+                        <div class="teacher-field">
+                            <label for="moduleTitle">Module title</label>
+
+                            <input id="moduleTitle"
+                                   type="text"
+                                   name="title"
+                                   class="teacher-input"
+                                   maxlength="255"
+                                   placeholder="Enter module title"
+                                   required />
+                        </div>
+
+                        <div class="upload-row">
+                            <div class="teacher-field">
+                                <label for="moduleFile">Module file</label>
+
+                                <input id="moduleFile"
+                                       type="file"
+                                       name="uploadedFile"
+                                       class="teacher-input"
+                                       required />
+                            </div>
+
+                            <button type="submit"
+                                    class="teacher-button teacher-button-purple">
+                                Upload Module
+                            </button>
+                        </div>
+                    </form>
+
+                    <div style="height: 20px;"></div>
+
+                    @if (!modules.Any())
+                    {
+                        <div class="teacher-empty-state">
+                            No modules have been uploaded to this classroom.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="teacher-list">
+                            @foreach (var module in modules.OrderBy(m => m.title))
+                            {
+                                <article class="teacher-list-item">
+                                    <div class="teacher-item-content">
+                                        <h3>@module.title</h3>
+                                        <p>Course material</p>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(module.file_path))
+                                    {
+                                        <a href="@module.file_path"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="teacher-button">
+                                            View File
+                                        </a>
+                                    }
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="teacher-panel">
+                <header class="teacher-panel-header">
+                    <h2>Assignments</h2>
+
+                    <a href="@Url.Action(
+                                                   "Create",
+                                                   "TeacherAssignments",
+                                                   new { classroomId = Model.classroom_id })"
+                       class="teacher-button teacher-button-success">
+                        + Create Assignment
+                    </a>
+                </header>
+
+                <div class="teacher-panel-body">
+                    @if (!assignments.Any())
+                    {
+                        <div class="teacher-empty-state">
+                            <strong>No assignments yet.</strong>
+                            <p>
+                                Create an assignment to publish instructions
+                                and a due date for your enrolled students.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="teacher-list">
+                            @foreach (var assignment in assignments.OrderBy(a => a.due_date))
+                            {
+                                <article class="teacher-list-item">
+                                    <div class="teacher-item-content">
+                                        <h3>@assignment.title</h3>
+
+                                        @if (!string.IsNullOrWhiteSpace(assignment.description))
+                                        {
+                                            <p>@assignment.description</p>
+                                        }
+
+                                        <span class="teacher-item-meta">
+                                            Due:
+                                            @assignment.due_date.ToString("MMM dd, yyyy · hh:mm tt")
+                                        </span>
+
+                                        <span class="teacher-chip">
+                                            @assignment.Category ·
+                                            @assignment.MaxScore points
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(assignment.attachment_link))
+                                        {
+                                            <p style="margin-top: 10px;">
+                                                <a href="@assignment.attachment_link"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    Open reference link
+                                                </a>
+                                            </p>
+                                        }
+                                    </div>
+
+                                    <a href="@Url.Action(
+                                                                                   "AssignmentDetails",
+                                                                                   "Teacher",
+                                                                                   new { id = assignment.assignment_id })"
+                                       class="teacher-button">
+                                        View Submissions
+                                    </a>
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+
+        </main>
+
+        <aside class="teacher-sidebar">
+            <section class="teacher-panel">
+                <header class="teacher-panel-header">
+                    <h2>Enrolled Students</h2>
+                    <span class="teacher-chip">@students.Count()</span>
+                </header>
+
+                <div class="teacher-panel-body">
+                    @if (!students.Any())
+                    {
+                        <div class="teacher-empty-state">
+                            No students are enrolled in this classroom.
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var student in students
+                            .OrderBy(s => s.User == null ? "" : s.User.l_name))
+                        {
+                            <div class="teacher-student">
+                                <div class="teacher-student-name">
+                                    @(student.User?.l_name ?? "Unknown"),
+                                    @(student.User?.f_name ?? "Student")
+                                </div>
+
+                                <div class="teacher-student-id">
+                                    Student ID: @student.student_number
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>

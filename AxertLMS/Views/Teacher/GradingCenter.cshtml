@@ -1,0 +1,123 @@
+﻿@model IEnumerable<AxertLMS.Models.Classroom>
+@{
+    ViewData["Title"] = "Grading Center";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --navy-dark: #020C1B;
+        --gradient: linear-gradient(to right, var(--navy-light), var(--navy-dark));
+    }
+
+    .gc-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .gc-header {
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .gc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .gc-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gc-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    .gc-badge {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .gc-link {
+        color: #3b82f6;
+        text-decoration: none;
+        margin-top: 1.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+
+        .gc-link:hover {
+            text-decoration: underline;
+        }
+
+    .text-secondary {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="gc-wrapper">
+    <div class="gc-header">
+        <h2 style="margin: 0 0 0.5rem 0;">Grading Center</h2>
+        <p class="text-secondary" style="margin: 0;">Select a classroom to view its master gradebook.</p>
+    </div>
+
+    <div class="gc-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var room in Model)
+            {
+                <div class="gc-card">
+                    <div class="gc-title-row">
+                        <h4 style="margin: 0; font-size: 1.1rem;">@(room.Subject?.subject_name ?? "Subject")</h4>
+                        <span class="gc-badge">Up to Date</span>
+                    </div>
+                    <p class="text-secondary" style="margin: 0;">
+                        <span>
+                            @(room.Section?.section_name ?? "No Section")
+                            —
+                            @(room.Section?.Strand?.strand_code ?? "N/A")
+                            —
+                            Grade @(room.Section?.year_lvl ?? "N/A")
+                        </span>
+                    </p>
+                    <div>
+                        <a href="/Teacher/ClassGradebook/@room.classroom_id" class="gc-link">Open Gradebook &rarr;</a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 3rem; border: 1px dashed var(--border-subtle); border-radius: 8px;">
+                <p style="margin: 0;">No active classrooms available for grading center.</p>
+            </div>
+        }
+    </div>
+</div>

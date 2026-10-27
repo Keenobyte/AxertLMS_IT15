@@ -1,0 +1,178 @@
+﻿@model AxertLMS.Models.ClassGradebookViewModel
+
+@{
+    ViewData["Title"] = "Class Gradebook";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var students = Model.Students;
+    var assignments = Model.Assignments;
+    var submissions = Model.Submissions;
+    var grades = Model.Grades;
+}
+
+<style>
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --navy-dark: #020C1B;
+    }
+
+    .gb-wrapper {
+        padding: 2rem;
+        color: var(--text-primary);
+    }
+
+    .gb-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 1rem;
+    }
+
+    .gb-table-container {
+        background: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        overflow-x: auto;
+        max-height: 70vh;
+    }
+
+    .gb-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+        .gb-table th {
+            position: sticky;
+            top: 0;
+            background: var(--navy-dark);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 10;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .gb-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+            .gb-table th:first-child, .gb-table td:first-child {
+                position: sticky;
+                left: 0;
+                background: var(--bg-card);
+                z-index: 11;
+                border-right: 1px solid var(--border-subtle);
+                font-weight: bold;
+            }
+
+        .gb-table th:first-child {
+            background: var(--navy-dark);
+            z-index: 12;
+        }
+
+    .gb-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .gb-link:hover {
+            text-decoration: underline;
+        }
+
+    .score-high {
+        color: #10b981;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .score-mid {
+        color: #f59e0b;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .score-low {
+        color: #ef4444;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .gb-missing {
+        color: var(--text-secondary);
+        font-weight: bold;
+        opacity: 0.4;
+    }
+</style>
+
+<div class="gb-wrapper">
+    <div class="gb-header-container">
+        <div>
+            <h2 style="margin: 0 0 0.25rem 0;">@Model.Classroom?.Subject?.subject_name</h2>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">@Model.Classroom?.Section?.section_name &bull; Master Gradebook</p>
+        </div>
+        <a href="/Teacher/GradingCenter" class="gb-link">&larr; Return to Hub</a>
+    </div>
+
+    <div class="gb-table-container">
+        <table class="gb-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    @foreach (var task in assignments)
+                    {
+                        <th>@task.title</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in students)
+                {
+                    if (student == null) continue;
+                    <tr>
+                        <td>@student.User?.l_name, @student.User?.f_name</td>
+                        @foreach (var task in assignments)
+                        {
+                            var sub = submissions.FirstOrDefault(s => s.assignment_id == task.assignment_id && s.student_id == student.student_id);
+                            var grade = sub != null ? grades.FirstOrDefault(g => g.submission_id == sub.submission_id) : null;
+
+                            <td style="text-align: center;">
+                                @if (sub == null)
+                                {
+                                    <span class="gb-missing">--</span>
+                                }
+                                else if (grade == null)
+                                {
+                                    /* Fixed route parameter lowercase 'id' to match [FromQuery] int id */
+                                    <a href="/Teacher/EvaluateSubmission?id=@sub.submission_id" class="gb-link">Evaluate</a>
+                                }
+                                else
+                                {
+                                    string scoreClass = "score-high";
+                                    if (grade.score < 75) { scoreClass = "score-low"; }
+                                    else if (grade.score < 90) { scoreClass = "score-mid"; }
+
+                                    /* Fixed route parameter lowercase 'id' to match [FromQuery] int id */
+                                    <a href="/Teacher/EvaluateSubmission?id=@sub.submission_id" class="@scoreClass">@grade.score.ToString("0.00")</a>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

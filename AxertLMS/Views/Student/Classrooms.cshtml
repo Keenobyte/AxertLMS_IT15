@@ -1,0 +1,178 @@
+﻿@model IEnumerable<AxertLMS.Models.Classroom>
+
+@{
+    ViewData["Title"] = "My Enrolled Classes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Strict HCI Dark Mode Palette */
+    :root {
+        --bg-main: #1A1A1A;
+        --bg-card: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #9CA3AF;
+        --border-subtle: #2D3748;
+        --navy-light: #0B1F3A;
+        --navy-dark: #020C1B;
+        --accent-blue: #3B82F6; /* Matched from your dashboard View Details buttons */
+    }
+
+    .header-section {
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 15px;
+    }
+
+        .header-section h2 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+    /* Clean, auto-fitting grid for cards */
+    .dashboard-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        align-items: start;
+    }
+
+    .class-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        color: var(--text-primary);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+        .class-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border-color: var(--navy-light);
+        }
+
+    .card-header {
+        /* Using your requested gradient wisely! */
+        background: linear-gradient(135deg, var(--navy-light) 0%, var(--bg-card) 100%);
+        padding: 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        position: relative;
+    }
+
+        /* Top accent line to match your dashboard widgets (like the orange/green/blue lines) */
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-blue);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .card-header p {
+            margin: 8px 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+    .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .instructor-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+        .instructor-info strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+    .enter-btn {
+        display: block;
+        text-align: center;
+        background: transparent;
+        color: var(--text-primary);
+        padding: 10px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 1px solid var(--border-subtle);
+        transition: all 0.2s ease;
+        margin-top: auto; /* Always pushes the button to the bottom of the card */
+    }
+
+        .enter-btn:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #ffffff;
+        }
+
+    .empty-state {
+        color: var(--text-secondary);
+        padding: 30px;
+        background: var(--bg-card);
+        border: 1px dashed var(--border-subtle);
+        border-radius: 12px;
+        text-align: center;
+        grid-column: 1 / -1; /* Spans the full width */
+    }
+</style>
+
+<div class="header-section">
+    <h2>My Enrolled Classes</h2>
+</div>
+
+<div class="dashboard-layout">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <p style="margin:0;">No active enrollments found. Please contact the Registrar.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var c in Model)
+        {
+            <div class="class-card">
+                <div class="card-header">
+                    <h3>@(c.Subject?.subject_name ?? "Unknown Subject")</h3>
+                    <p>Section: @(c.Section?.section_name ?? "Unsectioned")</p>
+                </div>
+                <div class="card-body">
+                    <div class="instructor-info">
+                        <span>👨‍🏫</span>
+                        <span>Instructor: <strong>@(c.Teacher?.User?.f_name ?? "TBA") @(c.Teacher?.User?.l_name ?? "")</strong></span>
+                    </div>
+                    <a href="/Student/ClassDetails/@c.classroom_id" class="enter-btn">Enter Classroom</a>
+                </div>
+            </div>
+        }
+    }
+</div>

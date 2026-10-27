@@ -1,0 +1,296 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Register Faculty";
+}
+
+<style>
+    :root {
+        --surface: #20242a;
+        --surface-soft: #1b1e23;
+        --text: #f7f8fa;
+        --muted: #9da6b5;
+        --line: #363d47;
+        --blue: #4f93e6;
+        --green: #34d399;
+        --red: #fb7185;
+    }
+
+    .faculty-page {
+        max-width: 920px;
+        margin: 0 auto;
+        color: var(--text);
+    }
+
+    .faculty-header {
+        margin-bottom: 1.8rem;
+    }
+
+    .eyebrow {
+        color: #83b7ff;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-weight: 800;
+        margin: 0 0 .5rem;
+    }
+
+    .faculty-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: -.035em;
+    }
+
+    .faculty-header > p:last-child {
+        color: var(--muted);
+        margin: .55rem 0 0;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+        .card + .card {
+            margin-top: 1rem;
+        }
+
+    .card-heading {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .card-copy {
+        color: var(--muted);
+        margin: .38rem 0 1.25rem;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .9rem;
+    }
+
+    .field {
+        margin-bottom: 1.2rem;
+    }
+
+    label {
+        display: block;
+        color: #c9d1dc;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        margin-bottom: .5rem;
+    }
+
+    input,
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        background: #17191d !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px;
+        padding: .83rem .9rem;
+        font: inherit;
+    }
+
+        input::placeholder {
+            color: #737d8d;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none !important;
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(79,147,230,.14) !important;
+        }
+
+        select option {
+            background: #17191d;
+            color: var(--text);
+        }
+
+    .help {
+        color: var(--muted);
+        font-size: .82rem;
+        margin: .45rem 0 0;
+        line-height: 1.45;
+    }
+
+    .account-note {
+        display: flex;
+        align-items: flex-start;
+        gap: .65rem;
+        color: var(--muted);
+        background: var(--surface-soft);
+        border-radius: 8px;
+        padding: .8rem .9rem;
+        font-size: .84rem;
+        line-height: 1.45;
+        margin-bottom: 1.25rem;
+    }
+
+        .account-note i {
+            color: #83b7ff;
+            margin-top: .1rem;
+        }
+
+    .submit {
+        width: 100%;
+        padding: .95rem 1rem;
+        border: 1px solid #47a886;
+        color: #fff;
+        background: linear-gradient(135deg,#167454,#0e513d);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter .2s ease;
+    }
+
+        .submit:hover {
+            filter: brightness(1.12);
+        }
+
+    .message {
+        border-radius: 9px;
+        padding: .9rem 1rem;
+        margin-bottom: 1rem;
+        font-size: .9rem;
+    }
+
+    .success {
+        color: #a7f3d0;
+        background: rgba(52,211,153,.1);
+        border: 1px solid rgba(52,211,153,.3);
+    }
+
+    .error {
+        color: #fecdd3;
+        background: rgba(251,113,133,.1);
+        border: 1px solid rgba(251,113,133,.3);
+    }
+
+    @@media (max-width: 640px) {
+        .faculty-header h1 {
+            font-size: 1.7rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .card {
+            padding: 1.1rem;
+        }
+    }
+</style>
+
+<main class="faculty-page">
+    <header class="faculty-header">
+        <p class="eyebrow">Registrar workspace</p>
+        <h1>Register faculty member</h1>
+        <p>Create a faculty account and assign the member's primary specialization.</p>
+    </header>
+
+    @if (ViewBag.SuccessMessage != null)
+    {
+        <div class="message success">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @ViewBag.SuccessMessage
+        </div>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="message error">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <section class="card">
+        <h2 class="card-heading">Create faculty account</h2>
+        <p class="card-copy">
+            Enter the faculty member's account information and professional specialization.
+        </p>
+
+        <div class="account-note">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>
+                Use the faculty member's official information. The temporary password should be
+                communicated securely after the account has been created.
+            </span>
+        </div>
+
+        <form method="post" action="/Registrar/RegisterTeacher">
+            @Html.AntiForgeryToken()
+
+            <div class="form-row">
+                <div class="field">
+                    <label for="f_name">FIRST NAME</label>
+                    <input id="f_name"
+                           type="text"
+                           name="f_name"
+                           placeholder="Enter first name"
+                           required />
+                </div>
+
+                <div class="field">
+                    <label for="l_name">LAST NAME</label>
+                    <input id="l_name"
+                           type="text"
+                           name="l_name"
+                           placeholder="Enter last name"
+                           required />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="field">
+                    <label for="email">EMAIL ADDRESS</label>
+                    <input id="email"
+                           type="email"
+                           name="email"
+                           placeholder="faculty@gmail.com"
+                           required />
+                    <p class="help">Use the faculty member's official or registered Gmail address.</p>
+                </div>
+
+                <div class="field">
+                    <label for="password">TEMPORARY PASSWORD</label>
+                    <input id="password"
+                           type="password"
+                           name="password"
+                           placeholder="Create a temporary password"
+                           required />
+                    <p class="help">The faculty member can change this after signing in.</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="specialization">PRIMARY SPECIALIZATION</label>
+
+                <select id="specialization" name="specialization" required>
+                    <option value="">Select subject area</option>
+                    <option value="Math">Mathematics</option>
+                    <option value="Science">Science</option>
+                    <option value="English">English</option>
+                    <option value="Filipino">Filipino</option>
+                    <option value="PE">Physical Education</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit">
+                <i class="fa-solid fa-user-plus me-2"></i>
+                Create Faculty Account
+            </button>
+        </form>
+    </section>
+</main>
