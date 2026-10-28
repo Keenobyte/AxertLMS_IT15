@@ -435,7 +435,7 @@ namespace AxertLMS.Controllers
                 return BeginGoogleAuthorization(
                     "login",
                     null,
-                    true);
+                    false);
             }
             catch (InvalidOperationException ex)
             {
@@ -462,7 +462,7 @@ namespace AxertLMS.Controllers
                 return BeginGoogleAuthorization(
                     "register",
                     null,
-                    true);
+                    false);
             }
             catch (InvalidOperationException ex)
             {

@@ -35,8 +35,8 @@ namespace AxertLMS.Services
         private static readonly string[] IdentityScopes =
         {
             "openid",
-            "https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile"
+            "email",
+            "profile"
         };
 
         public const string CalendarScope =
@@ -121,9 +121,15 @@ namespace AxertLMS.Services
                     ["scope"] = string.Join(
                         " ",
                         GetScopes(includeCalendar)),
-                    ["access_type"] = "offline",
-                    ["prompt"] = "consent",
-                    ["include_granted_scopes"] = "true",
+                    ["access_type"] = includeCalendar
+                        ? "offline"
+                        : null,
+                    ["prompt"] = includeCalendar
+                        ? "consent"
+                        : "select_account",
+                    ["include_granted_scopes"] = includeCalendar
+                        ? "true"
+                        : "false",
                     ["state"] = state,
                     ["code_challenge"] = codeChallenge,
                     ["code_challenge_method"] = "S256"
