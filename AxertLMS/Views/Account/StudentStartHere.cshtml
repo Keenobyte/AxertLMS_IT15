@@ -1,0 +1,166 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "New Student Start Here";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Student Start Here - AXERT LMS</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-main: #1A1A1A;
+            --bg-card: #121212;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9CA3AF;
+            --border-subtle: #2D3748;
+            --navy-light: #0B1F3A;
+            --navy-dark: #020C1B;
+            --success: #10B981;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        main {
+            width: 100%;
+            max-width: 560px;
+            padding: 40px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            background: var(--bg-card);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .brand img {
+            width: 56px;
+            height: auto;
+        }
+
+        .brand-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .brand-subtitle,
+        .copy {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 1.8rem;
+        }
+
+        .success {
+            margin: 24px 0;
+            padding: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--success);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .actions a {
+            flex: 1;
+            min-width: 190px;
+            padding: 13px 16px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .actions a:first-child {
+            background: linear-gradient(to right, var(--navy-light), var(--navy-dark));
+        }
+
+        .actions a:hover {
+            border-color: #4A5568;
+        }
+
+        @@media (max-width: 520px) {
+            main {
+                padding: 28px 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="brand">
+            <img src="~/images/logo.png" alt="Axert University">
+            <div>
+                <div class="brand-name">Axert University</div>
+                <div class="brand-subtitle">Learning Management System</div>
+            </div>
+        </div>
+
+        <h1>New Student Start Here</h1>
+        <p class="copy">Welcome, @ViewBag.StudentName. Your Google account has been verified.</p>
+
+        @if (TempData["RegistrationSuccess"] != null)
+        {
+            <div class="success">@TempData["RegistrationSuccess"]</div>
+        }
+        else if (ViewBag.IsAwaitingApproval == true)
+        {
+            <p class="copy">
+                Your student enrollment is waiting for Registrar approval.
+                Once your profile is completed, sign in again to continue to your dashboard.
+            </p>
+        }
+        else if (ViewBag.HasStudentProfile == true)
+        {
+            <p class="copy">
+                Your student profile exists, but your account is not active yet.
+                Please contact the Registrar to finish your enrollment.
+            </p>
+        }
+        else
+        {
+            <p class="copy">
+                Your student profile has not been completed yet.
+                The Registrar must finish your enrollment before you can access the LMS.
+                Sign in again later to resume here.
+            </p>
+        }
+
+        <div class="actions">
+            <a asp-controller="Account" asp-action="StudentStartHere">Check registration status</a>
+            <a asp-controller="Account" asp-action="Logout">Sign out</a>
+        </div>
+    </main>
+</body>
+</html>

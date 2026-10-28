@@ -43,4 +43,10 @@
 		<Folder Include="Areas\Identity\Pages\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Update="appsettings.Local.json"
+				 CopyToOutputDirectory="Never"
+				 CopyToPublishDirectory="Never" />
+	</ItemGroup>
+
 </Project>

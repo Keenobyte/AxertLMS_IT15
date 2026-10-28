@@ -57,6 +57,83 @@ namespace AxertLMS.Controllers
             return View();
         }
 
+        [HttpGet]
+        [ResponseCache(
+            NoStore = true,
+            Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> StudentStartHere(
+            CancellationToken cancellationToken)
+        {
+            int? userId =
+                HttpContext.Session.GetInt32(
+                    GoogleOAuthService.OnboardingUserIdSessionKey);
+
+            if (!userId.HasValue)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            User? user =
+                await _context.Users
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(
+                        u => u.user_id == userId.Value,
+                        cancellationToken);
+
+            if (user == null ||
+                !string.Equals(
+                    user.role,
+                    "Student",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                HttpContext.Session.Remove(
+                    GoogleOAuthService.OnboardingUserIdSessionKey);
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (string.Equals(
+                    user.status,
+                    "Inactive",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                HttpContext.Session.Remove(
+                    GoogleOAuthService.OnboardingUserIdSessionKey);
+
+                TempData["Error"] =
+                    "Your account is currently inactive. Please contact the Registrar.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            bool hasStudentProfile =
+                await _context.Students
+                    .AsNoTracking()
+                    .AnyAsync(
+                        s => s.user_id == user.user_id,
+                        cancellationToken);
+
+            if (hasStudentProfile &&
+                string.Equals(
+                    user.status,
+                    "Active",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                SignInUser(user);
+                return RedirectByRole(user.role);
+            }
+
+            ViewBag.StudentName = user.f_name;
+            ViewBag.IsAwaitingApproval =
+                string.Equals(
+                    user.status,
+                    "Pending",
+                    StringComparison.OrdinalIgnoreCase);
+            ViewBag.HasStudentProfile = hasStudentProfile;
+
+            return View();
+        }
+
         // ============================================================
         // NORMAL PASSWORD REGISTRATION
         // ============================================================
@@ -292,24 +369,47 @@ namespace AxertLMS.Controllers
             if (
                 string.Equals(
                     user.status,
-                    "Pending",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                ViewBag.Error =
-                    "Your enrollment application is still pending Registrar approval.";
-
-                return View();
-            }
-
-            if (
-                string.Equals(
-                    user.status,
                     "Inactive",
                     StringComparison.OrdinalIgnoreCase))
             {
                 ViewBag.Error =
                     "Your account is currently inactive. " +
                     "Please contact the Registrar.";
+
+                return View();
+            }
+
+            if (string.Equals(
+                    user.role,
+                    "Student",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                bool hasStudentProfile =
+                    await _context.Students
+                        .AsNoTracking()
+                        .AnyAsync(
+                            s => s.user_id == user.user_id,
+                            cancellationToken);
+
+                if (string.Equals(
+                        user.status,
+                        "Pending",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    !hasStudentProfile)
+                {
+                    BeginStudentOnboarding(user.user_id);
+                    return RedirectToAction(
+                        nameof(StudentStartHere));
+                }
+            }
+
+            if (string.Equals(
+                    user.status,
+                    "Pending",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                ViewBag.Error =
+                    "Your enrollment application is still pending Registrar approval.";
 
                 return View();
             }
@@ -619,6 +719,16 @@ namespace AxertLMS.Controllers
                 switch (purpose)
                 {
                     case "register":
+                        if (user != null)
+                        {
+                            return await ProcessGoogleLoginAsync(
+                                user,
+                                googleUser,
+                                token,
+                                googleAccount,
+                                cancellationToken);
+                        }
+
                         return await ProcessGoogleRegistrationAsync(
                             user,
                             googleUser,
@@ -626,6 +736,15 @@ namespace AxertLMS.Controllers
                             cancellationToken);
 
                     case "login":
+                        if (user == null)
+                        {
+                            return await ProcessGoogleRegistrationAsync(
+                                null,
+                                googleUser,
+                                token,
+                                cancellationToken);
+                        }
+
                         return await ProcessGoogleLoginAsync(
                             user,
                             googleUser,
@@ -798,7 +917,10 @@ namespace AxertLMS.Controllers
                     "Your Google account has been verified and your enrollment application has been submitted. " +
                     "The Registrar must approve your application before you can access the LMS.";
 
-                return RedirectToAction(nameof(Login));
+                BeginStudentOnboarding(newUser.user_id);
+
+                return RedirectToAction(
+                    nameof(StudentStartHere));
             }
             catch
             {
@@ -865,23 +987,48 @@ namespace AxertLMS.Controllers
             if (
                 string.Equals(
                     user.status,
-                    "Pending",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                TempData["Error"] =
-                    "Your enrollment application is still pending Registrar approval.";
-
-                return RedirectToAction(nameof(Login));
-            }
-
-            if (
-                string.Equals(
-                    user.status,
                     "Inactive",
                     StringComparison.OrdinalIgnoreCase))
             {
                 TempData["Error"] =
                     "Your AxertLMS account is currently inactive.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (string.Equals(
+                    user.role,
+                    "Student",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                bool hasStudentProfile =
+                    await _context.Students
+                        .AsNoTracking()
+                        .AnyAsync(
+                            s => s.user_id == user.user_id,
+                            cancellationToken);
+
+                if (string.Equals(
+                        user.status,
+                        "Pending",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    !hasStudentProfile)
+                {
+                    BeginStudentOnboarding(user.user_id);
+
+                    return RedirectToAction(
+                        nameof(StudentStartHere));
+                }
+            }
+
+            if (
+                string.Equals(
+                    user.status,
+                    "Pending",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] =
+                    "Your enrollment application is still pending Registrar approval.";
 
                 return RedirectToAction(nameof(Login));
             }
@@ -1003,6 +1150,12 @@ namespace AxertLMS.Controllers
             string codeVerifier =
                 GoogleOAuthService.GenerateCodeVerifier();
 
+            string authorizationUrl =
+                _googleOAuth.CreateAuthorizationUrl(
+                    state,
+                    codeVerifier,
+                    includeCalendar);
+
             HttpContext.Session.SetString(
                 GoogleOAuthService.StateSessionKey,
                 state);
@@ -1031,12 +1184,6 @@ namespace AxertLMS.Controllers
                     GoogleOAuthService.UserIdSessionKey);
             }
 
-            string authorizationUrl =
-                _googleOAuth.CreateAuthorizationUrl(
-                    state,
-                    codeVerifier,
-                    includeCalendar);
-
             return Redirect(authorizationUrl);
         }
 
@@ -1059,6 +1206,17 @@ namespace AxertLMS.Controllers
             HttpContext.Session.SetString(
                 "UserEmail",
                 user.email);
+        }
+
+        private void BeginStudentOnboarding(int userId)
+        {
+            HttpContext.Session.Remove("UserId");
+            HttpContext.Session.Remove("UserRole");
+            HttpContext.Session.Remove("UserEmail");
+
+            HttpContext.Session.SetInt32(
+                GoogleOAuthService.OnboardingUserIdSessionKey,
+                userId);
         }
 
         private void ClearGoogleOAuthSession()

@@ -12,6 +12,14 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .AddJsonFile(
+        "appsettings.Local.json",
+        optional: true,
+        reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .AddCommandLine(args);
+
 // ============================================================
 // FORWARDED HEADERS CONFIGURATION
 // ============================================================

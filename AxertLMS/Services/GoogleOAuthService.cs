@@ -27,6 +27,9 @@ namespace AxertLMS.Services
         public const string UserIdSessionKey =
             "AxertLMS.GoogleOAuth.UserId";
 
+        public const string OnboardingUserIdSessionKey =
+            "AxertLMS.StudentOnboarding.UserId";
+
         public const int StateLifetimeMinutes = 10;
 
         private static readonly string[] IdentityScopes =
@@ -90,17 +93,7 @@ namespace AxertLMS.Services
             string codeVerifier,
             bool includeCalendar)
         {
-            if (string.IsNullOrWhiteSpace(_options.ClientId))
-            {
-                throw new InvalidOperationException(
-                    "GoogleOAuth:ClientId is not configured.");
-            }
-
-            if (string.IsNullOrWhiteSpace(_options.RedirectUri))
-            {
-                throw new InvalidOperationException(
-                    "GoogleOAuth:RedirectUri is not configured.");
-            }
+            ValidateConfiguration();
 
             if (string.IsNullOrWhiteSpace(state))
             {
@@ -146,13 +139,7 @@ namespace AxertLMS.Services
             string codeVerifier,
             CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(_options.ClientId) ||
-                string.IsNullOrWhiteSpace(_options.ClientSecret) ||
-                string.IsNullOrWhiteSpace(_options.RedirectUri))
-            {
-                throw new InvalidOperationException(
-                    "Google OAuth configuration is incomplete.");
-            }
+            ValidateConfiguration();
 
             using var request =
                 new HttpRequestMessage(
@@ -205,6 +192,32 @@ namespace AxertLMS.Services
             }
 
             return token;
+        }
+
+        private void ValidateConfiguration()
+        {
+            if (string.IsNullOrWhiteSpace(_options.ClientId))
+            {
+                throw new InvalidOperationException(
+                    "GoogleOAuth:ClientId is not configured.");
+            }
+
+            if (string.IsNullOrWhiteSpace(_options.ClientSecret))
+            {
+                throw new InvalidOperationException(
+                    "GoogleOAuth:ClientSecret is not configured.");
+            }
+
+            if (!Uri.TryCreate(
+                    _options.RedirectUri,
+                    UriKind.Absolute,
+                    out Uri? redirectUri) ||
+                (redirectUri.Scheme != Uri.UriSchemeHttps &&
+                 !redirectUri.IsLoopback))
+            {
+                throw new InvalidOperationException(
+                    "GoogleOAuth:RedirectUri must be an absolute HTTPS URI, except for loopback development URLs.");
+            }
         }
 
         public async Task<AxertLMS.Models.GoogleTokenResponse> RefreshAccessTokenAsync(
