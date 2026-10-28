@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using AxertLMS.Models;
+using System.Diagnostics;
+
 namespace AxertLMS.Controllers
 {
     public class HomeController : Controller
@@ -32,7 +35,13 @@ namespace AxertLMS.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View();
+            return View(
+                new ErrorViewModel
+                {
+                    RequestId =
+                        Activity.Current?.Id ??
+                        HttpContext.TraceIdentifier
+                });
         }
     }
 }
