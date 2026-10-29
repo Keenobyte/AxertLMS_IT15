@@ -20,6 +20,20 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 
+var defaultConnectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(defaultConnectionString))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection must be configured.");
+}
+
+bool usesLocalDb =
+    defaultConnectionString.Contains(
+        "(localdb)",
+        StringComparison.OrdinalIgnoreCase);
+
 // ============================================================
 // FORWARDED HEADERS CONFIGURATION
 // ============================================================
@@ -59,9 +73,7 @@ builder.Services.AddScoped<GoogleCalendarService>();
 // ============================================================
 builder.Services.AddDbContext<ApplicationDbContext>(
     options =>
-        options.UseSqlServer(
-            builder.Configuration.GetConnectionString(
-                "DefaultConnection")));
+        options.UseSqlServer(defaultConnectionString));
 
 // ============================================================
 // HTTP CLIENT
@@ -156,6 +168,13 @@ builder.Services.AddAntiforgery(
 // ============================================================
 var app =
     builder.Build();
+
+if (!app.Environment.IsDevelopment() && usesLocalDb)
+{
+    app.Logger.LogCritical(
+        "Production is configured with LocalDB. Set " +
+        "ConnectionStrings__DefaultConnection to the hosted SQL Server connection string.");
+}
 
 // ============================================================
 // FORWARDED HEADERS MIDDLEWARE
