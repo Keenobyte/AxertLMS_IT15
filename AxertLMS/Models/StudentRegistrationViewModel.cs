@@ -21,9 +21,9 @@ namespace AxertLMS.Models
         public string LastName { get; set; } = string.Empty;
 
         [Required]
-        [EmailAddress(ErrorMessage = "Enter a valid Gmail address.")]
+        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
         [StringLength(255)]
-        [Display(Name = "Gmail address")]
+        [Display(Name = "Email address")]
         public string Email { get; set; } = string.Empty;
 
         [Required]

@@ -10,6 +10,7 @@ using AxertLMS.Services;
 using GoogleTokenResponse = AxertLMS.Models.GoogleTokenResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -54,7 +55,7 @@ namespace AxertLMS.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            return View(new StudentRegistrationViewModel());
         }
 
         [HttpGet]
@@ -141,83 +142,54 @@ namespace AxertLMS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(
-            User model,
-            string rawPassword,
+            StudentRegistrationViewModel model,
             CancellationToken cancellationToken)
         {
-            if (
-                model == null ||
-                string.IsNullOrWhiteSpace(rawPassword))
+            if (model == null)
             {
-                ViewBag.Error =
-                    "Registration inputs cannot be empty.";
-
-                return View();
+                return BadRequest();
             }
 
-            model.email =
-                model.email?
-                    .Trim()
-                    .ToLowerInvariant()
+            model.FirstName =
+                model.FirstName?.Trim() ?? string.Empty;
+            model.LastName =
+                model.LastName?.Trim() ?? string.Empty;
+            model.Email =
+                model.Email?.Trim().ToLowerInvariant()
                 ?? string.Empty;
 
-            if (!EmailRegex.IsMatch(model.email))
+            ModelState.Clear();
+            if (!TryValidateModel(model))
             {
-                _logger.LogWarning(
-                    "VALIDATION_FAILURE: Malformed registration email.");
-
-                ViewBag.Error =
-                    "Invalid email formatting provided.";
-
-                return View();
-            }
-
-            if (!GmailRegex.IsMatch(model.email))
-            {
-                ViewBag.Error =
-                    "Please use a Gmail address.";
-
-                return View();
-            }
-
-            var existingUser =
-                await _context.Users
-                    .AsNoTracking()
-                    .SingleOrDefaultAsync(
-                        u => u.email == model.email,
-                        cancellationToken);
-
-            if (existingUser != null)
-            {
-                ViewBag.Error =
-                    "An account with this email already exists.";
-
-                return View();
+                return View(model);
             }
 
             try
             {
+                bool emailExists =
+                    await _context.Users
+                        .AsNoTracking()
+                        .AnyAsync(
+                            u => u.email == model.Email,
+                            cancellationToken);
+
+                if (emailExists)
+                {
+                    ViewBag.Error =
+                        "An account with this email already exists.";
+
+                    return View(model);
+                }
+
                 var newUser =
                     new User
                     {
-                        f_name =
-                            model.f_name.Trim(),
-
-                        l_name =
-                            model.l_name.Trim(),
-
-                        email =
-                            model.email,
-
-                        password =
-                            PasswordHelper.Hash(
-                                rawPassword),
-
-                        role =
-                            "Student",
-
-                        status =
-                            "Pending"
+                        f_name = model.FirstName,
+                        l_name = model.LastName,
+                        email = model.Email,
+                        password = PasswordHelper.Hash(model.Password),
+                        role = "Student",
+                        status = "Pending"
                     };
 
                 _context.Users.Add(newUser);
@@ -237,25 +209,36 @@ namespace AxertLMS.Controllers
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogWarning(
-                    ex,
-                    "REGISTRATION_DATABASE_CONFLICT");
+                SqlException? sqlException =
+                    ex.GetBaseException() as SqlException;
 
-                ViewBag.Error =
-                    "This email is already associated with an account.";
+                if (sqlException?.Number is 2601 or 2627)
+                {
+                    ViewBag.Error =
+                        "An account with this email already exists.";
+                }
+                else
+                {
+                    _logger.LogError(
+                        ex,
+                        "Manual student registration database failure.");
 
-                return View();
+                    ViewBag.Error =
+                        "Your application could not be submitted. Please try again later.";
+                }
+
+                return View(model);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ContainsSqlException(ex))
             {
                 _logger.LogError(
                     ex,
-                    "REGISTRATION_FAILURE");
+                    "Database connection failed during manual student registration.");
 
                 ViewBag.Error =
-                    "An internal error occurred. Please try again later.";
+                    "Registration is temporarily unavailable. Please try again later.";
 
-                return View();
+                return View(model);
             }
         }
 
@@ -308,11 +291,30 @@ namespace AxertLMS.Controllers
                 return View();
             }
 
-            var user =
-                await _context.Users
-                    .SingleOrDefaultAsync(
-                        u => u.email == Email,
-                        cancellationToken);
+            User? user;
+
+            try
+            {
+                user =
+                    await _context.Users
+                        .SingleOrDefaultAsync(
+                            u => u.email == Email,
+                            cancellationToken);
+            }
+            catch (Exception ex) when (ContainsSqlException(ex))
+            {
+                _logger.LogError(
+                    ex,
+                    "Database connection failed during login.");
+
+                Response.StatusCode =
+                    StatusCodes.Status503ServiceUnavailable;
+
+                ViewBag.Error =
+                    "Sign-in is temporarily unavailable. Please try again later.";
+
+                return View();
+            }
 
             if (user == null)
             {
@@ -421,6 +423,23 @@ namespace AxertLMS.Controllers
                 user.user_id);
 
             return RedirectByRole(user.role);
+        }
+
+        private static bool ContainsSqlException(Exception exception)
+        {
+            Exception? current = exception;
+
+            while (current != null)
+            {
+                if (current is SqlException)
+                {
+                    return true;
+                }
+
+                current = current.InnerException;
+            }
+
+            return false;
         }
 
         // ============================================================

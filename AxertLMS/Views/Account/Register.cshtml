@@ -1,4 +1,5 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model AxertLMS.Models.StudentRegistrationViewModel
 @{
     Layout = null;
     ViewData["Title"] = "Student Enrollment";
@@ -163,6 +164,90 @@
                 margin-bottom: 25px;
             }
 
+            .error-message,
+            .field-validation-error {
+                color: #FCA5A5;
+                font-size: 0.85rem;
+            }
+
+            .error-message {
+                padding: 12px;
+                border: 1px solid rgba(239, 68, 68, 0.35);
+                border-radius: 8px;
+                background: rgba(239, 68, 68, 0.08);
+                margin-bottom: 18px;
+            }
+
+            .registration-form {
+                display: grid;
+                gap: 14px;
+            }
+
+            .name-fields {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .field {
+                display: grid;
+                gap: 7px;
+            }
+
+            .field label {
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .field input {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid var(--border-subtle);
+                border-radius: 8px;
+                background: var(--bg-card-light);
+                color: var(--text-primary);
+                font: inherit;
+            }
+
+            .field input:focus {
+                outline: 2px solid #2563EB;
+                outline-offset: 1px;
+            }
+
+            .registration-btn {
+                width: 100%;
+                padding: 14px;
+                border: 1px solid #1D4ED8;
+                border-radius: 9px;
+                background: linear-gradient(to right, var(--navy-light), var(--navy-dark));
+                color: var(--text-primary);
+                font-size: 0.95rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .registration-btn:hover {
+                border-color: #3B82F6;
+            }
+
+            .divider {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin: 20px 0;
+                color: var(--text-secondary);
+                font-size: 0.8rem;
+            }
+
+            .divider::before,
+            .divider::after {
+                content: "";
+                height: 1px;
+                flex: 1;
+                background: var(--border-subtle);
+            }
+
             .notice {
                 padding: 16px;
                 border-left: 4px solid var(--navy-light);
@@ -277,14 +362,57 @@
         <main class="right">
             <div class="card">
                 <h1>Student Enrollment</h1>
-                <p class="subtitle">Create your student enrollment application with Google.</p>
+                <p class="subtitle">Apply manually with an email and password, or continue with Google.</p>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="error-message" role="alert">@ViewBag.Error</div>
+                }
+
+                <form asp-controller="Account" asp-action="Register" method="post" class="registration-form">
+                    @Html.AntiForgeryToken()
+
+                    <div class="name-fields">
+                        <div class="field">
+                            <label asp-for="FirstName"></label>
+                            <input asp-for="FirstName" autocomplete="given-name" required>
+                            <span asp-validation-for="FirstName" class="field-validation-error"></span>
+                        </div>
+                        <div class="field">
+                            <label asp-for="LastName"></label>
+                            <input asp-for="LastName" autocomplete="family-name" required>
+                            <span asp-validation-for="LastName" class="field-validation-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" type="email" autocomplete="email" required>
+                        <span asp-validation-for="Email" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="new-password" required>
+                        <span asp-validation-for="Password" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="ConfirmPassword"></label>
+                        <input asp-for="ConfirmPassword" autocomplete="new-password" required>
+                        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                    </div>
+
+                    <button type="submit" class="registration-btn">Submit Manual Application</button>
+                </form>
+
+                <div class="divider">or</div>
 
                 <div class="notice">
-                    <strong>Google verification</strong>
+                    <strong>Continue with Google</strong>
                     <span>
-                        AxertLMS never receives your Google password.
-                        Google handles the sign-in and returns a verified
-                        account identity to the application.
+                        Google securely verifies your account. AxertLMS never receives
+                        your Google password.
                     </span>
                 </div>
 
@@ -297,7 +425,8 @@
                 </a>
 
                 <div class="footer">
-                    Your enrollment remains pending until the Registrar approves your application.
+                    Manual and Google applications remain pending until the Registrar approves them.
+                    Manual accounts can sign in with their email and password after approval.
                 </div>
             </div>
         </main>
