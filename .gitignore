@@ -10,8 +10,10 @@
 *.userosscache
 *.sln.docstates
 
-# Local OAuth credentials; use deployment environment variables outside development.
-/AxertLMS/appsettings.Local.json
+# Environment-specific settings can contain credentials. Keep the sanitized base
+# configuration and development logging config in source control.
+/AxertLMS/appsettings.*.json
+!/AxertLMS/appsettings.Development.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
