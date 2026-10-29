@@ -58,17 +58,6 @@ builder.Services.AddScoped<
     AxertLMS.Services.InternalQuizGeneratorService>();
 
 // ============================================================
-// GOOGLE OAUTH + CALENDAR
-// ============================================================
-builder.Services
-    .AddOptions<GoogleOAuthOptions>()
-    .Bind(builder.Configuration.GetSection("GoogleOAuth"));
-
-builder.Services.AddScoped<GoogleOAuthService>();
-builder.Services.AddScoped<GoogleTokenStore>();
-builder.Services.AddScoped<GoogleCalendarService>();
-
-// ============================================================
 // DATABASE
 // ============================================================
 builder.Services.AddDbContext<ApplicationDbContext>(
@@ -76,24 +65,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(
         options.UseSqlServer(defaultConnectionString));
 
 // ============================================================
-// HTTP CLIENT
-// Used for Google's token and userinfo endpoints.
-// ============================================================
-builder.Services.AddHttpClient(
-    "Google",
-    client =>
-    {
-        client.Timeout =
-            TimeSpan.FromSeconds(30);
-
-        client.DefaultRequestHeaders
-            .UserAgent.ParseAdd(
-                "AxertLMS/1.0");
-    });
-
-// ============================================================
 // DATA PROTECTION
-// Used to encrypt Google OAuth tokens before database storage.
+// Used to protect session and antiforgery data.
 // ============================================================
 var keyRingSetting =
     builder.Configuration["DataProtection:KeyRingPath"];

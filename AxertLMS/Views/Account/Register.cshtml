@@ -231,60 +231,6 @@
                 border-color: #3B82F6;
             }
 
-            .divider {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin: 20px 0;
-                color: var(--text-secondary);
-                font-size: 0.8rem;
-            }
-
-            .divider::before,
-            .divider::after {
-                content: "";
-                height: 1px;
-                flex: 1;
-                background: var(--border-subtle);
-            }
-
-            .notice {
-                padding: 16px;
-                border-left: 4px solid var(--navy-light);
-                border-radius: 0 8px 8px 0;
-                background: rgba(255,255,255,0.025);
-                margin-bottom: 24px;
-            }
-
-                .notice strong {
-                    display: block;
-                    margin-bottom: 6px;
-                }
-
-                .notice span {
-                    color: var(--text-secondary);
-                    font-size: 0.86rem;
-                    line-height: 1.5;
-                }
-
-            .google-btn {
-                display: block;
-                width: 100%;
-                padding: 14px;
-                border-radius: 9px;
-                font-size: 0.95rem;
-                font-weight: 700;
-                text-align: center;
-                text-decoration: none;
-                background: #FFFFFF;
-                color: #202124;
-                border: 1px solid #DADCE0;
-            }
-
-                .google-btn:hover {
-                    background: #F7F7F7;
-                }
-
             .back-btn {
                 display: block;
                 width: 100%;
@@ -362,7 +308,7 @@
         <main class="right">
             <div class="card">
                 <h1>Student Enrollment</h1>
-                <p class="subtitle">Apply manually with an email and password, or continue with Google.</p>
+                <p class="subtitle">Apply using your email address and password.</p>
 
                 @if (ViewBag.Error != null)
                 {
@@ -406,27 +352,13 @@
                     <button type="submit" class="registration-btn">Submit Manual Application</button>
                 </form>
 
-                <div class="divider">or</div>
-
-                <div class="notice">
-                    <strong>Continue with Google</strong>
-                    <span>
-                        Google securely verifies your account. AxertLMS never receives
-                        your Google password.
-                    </span>
-                </div>
-
-                <a href="@Url.Action("GoogleRegister", "Account")" class="google-btn">
-                    Continue with Google
-                </a>
-
                 <a href="@Url.Action("Login", "Account")" class="back-btn">
                     Back to Sign In
                 </a>
 
                 <div class="footer">
-                    Manual and Google applications remain pending until the Registrar approves them.
-                    Manual accounts can sign in with their email and password after approval.
+                    Applications remain pending until the Registrar approves them.
+                    Approved accounts can sign in with their email and password.
                 </div>
             </div>
         </main>

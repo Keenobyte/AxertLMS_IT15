@@ -123,31 +123,31 @@ namespace AxertLMS.Migrations
                 {
                     b.Property<int>("map_id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("curriculum_map_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("map_id"));
 
-                    b.Property<bool>("is_core_subject")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("strand_id")
-                        .HasColumnType("int");
+                    b.Property<string>("strand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("strand");
 
                     b.Property<int>("subject_id")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("subject_id");
 
                     b.Property<string>("year_lvl")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("nvarchar(5)")
+                        .HasColumnName("year_lvl");
 
                     b.HasKey("map_id");
 
-                    b.HasIndex("strand_id");
-
                     b.HasIndex("subject_id");
 
-                    b.ToTable("CurriculumMaps");
+                    b.ToTable("CurriculumMaps", (string)null);
                 });
 
             modelBuilder.Entity("AxertLMS.Models.Enrollment", b =>
@@ -174,76 +174,6 @@ namespace AxertLMS.Migrations
                     b.HasIndex("student_id");
 
                     b.ToTable("Enrollments");
-                });
-
-            modelBuilder.Entity("AxertLMS.Models.GoogleAccount", b =>
-                {
-                    b.Property<int>("GoogleAccountId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GoogleAccountId"));
-
-                    b.Property<DateTime?>("AccessTokenExpiresUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DisplayName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("EncryptedAccessToken")
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EncryptedRefreshToken")
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EnrollmentStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("GoogleEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("GoogleSubject")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("GrantedScopes")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiresUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("UpdatedUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("GoogleAccountId");
-
-                    b.HasIndex("GoogleSubject")
-                        .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("GoogleAccounts");
                 });
 
             modelBuilder.Entity("AxertLMS.Models.Grade", b =>
@@ -639,17 +569,11 @@ namespace AxertLMS.Migrations
 
             modelBuilder.Entity("AxertLMS.Models.CurriculumMap", b =>
                 {
-                    b.HasOne("AxertLMS.Models.Strand", "Strand")
-                        .WithMany()
-                        .HasForeignKey("strand_id");
-
                     b.HasOne("AxertLMS.Models.Subject", "Subject")
                         .WithMany()
                         .HasForeignKey("subject_id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Strand");
 
                     b.Navigation("Subject");
                 });
@@ -671,17 +595,6 @@ namespace AxertLMS.Migrations
                     b.Navigation("Classroom");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("AxertLMS.Models.GoogleAccount", b =>
-                {
-                    b.HasOne("AxertLMS.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("AxertLMS.Models.GoogleAccount", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AxertLMS.Models.Grade", b =>

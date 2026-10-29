@@ -22,12 +22,6 @@ namespace AxertLMS.Data
         public DbSet<Teacher> Teachers { get; set; }
 
         // ============================================================
-        // GOOGLE
-        // ============================================================
-
-        public DbSet<GoogleAccount> GoogleAccounts { get; set; }
-
-        // ============================================================
         // ACADEMIC ARCHITECTURE
         // ============================================================
 
@@ -85,25 +79,6 @@ namespace AxertLMS.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.email)
                 .IsUnique();
-
-            // --------------------------------------------------------
-            // GOOGLE ACCOUNT -> USER
-            // --------------------------------------------------------
-
-            modelBuilder.Entity<GoogleAccount>()
-                .HasIndex(g => g.UserId)
-                .IsUnique();
-
-            modelBuilder.Entity<GoogleAccount>()
-                .HasIndex(g => g.GoogleSubject)
-                .IsUnique();
-
-            modelBuilder.Entity<GoogleAccount>()
-                .HasOne(g => g.User)
-                .WithOne()
-                .HasForeignKey<GoogleAccount>(
-                    g => g.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // --------------------------------------------------------
             // CURRICULUM MAP -> LEGACY DATABASE SCHEMA

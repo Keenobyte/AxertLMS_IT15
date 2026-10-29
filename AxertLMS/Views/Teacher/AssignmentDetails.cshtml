@@ -241,26 +241,6 @@
         Due: <span style="color: #F59E0B; font-weight: bold;">@Model.due_date.ToString("MMM dd, yyyy - hh:mm tt")</span>
     </div>
 
-    <div style="margin-top: 15px;">
-        <form asp-controller="GoogleCalendar"
-              asp-action="CreateAssignmentEvent"
-              method="post"
-              style="display: inline-block;">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden"
-                   name="id"
-                   value="@Model.assignment_id" />
-
-            <button type="submit"
-                    class="btn-action">
-                Add Assignment Deadline to Google Calendar
-            </button>
-
-        </form>
-    </div>
-
     <div class="status-grid">
         <div class="status-box">
             <h3>@submittedCount</h3>
