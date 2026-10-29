@@ -140,8 +140,8 @@
         color: var(--text-secondary);
         margin-bottom: 2rem;
         ">
-        Approve a pending student application and assign
-        the student to an academic section.
+        Approve pending applications or complete the profile for
+        an active student, then assign the student to a section.
     </p>
 
     <div class="form-card">
@@ -176,14 +176,14 @@
             </div>
         }
 
-        @if (ViewBag.PendingUsers == null ||
-             !((IEnumerable<AxertLMS.Models.User>)ViewBag.PendingUsers).Any())
+        @if (ViewBag.UsersNeedingEnrollment == null ||
+             !((IEnumerable<AxertLMS.Models.User>)ViewBag.UsersNeedingEnrollment).Any())
         {
             <div class="empty-state">
 
                 <p>
-                    There are currently no pending student
-                    enrollment applications.
+                    There are no student accounts waiting for enrollment
+                    or profile completion.
                 </p>
 
             </div>
@@ -197,7 +197,7 @@
                 @Html.AntiForgeryToken()
 
                 <label class="form-label">
-                    SELECT PENDING STUDENT
+                    SELECT STUDENT ACCOUNT
                 </label>
 
                 <select name="user_id"
@@ -210,7 +210,7 @@
 
                     @foreach (
                         var user
-                        in (IEnumerable<AxertLMS.Models.User>)ViewBag.PendingUsers)
+                        in (IEnumerable<AxertLMS.Models.User>)ViewBag.UsersNeedingEnrollment)
                     {
                         <option value="@user.user_id">
 
@@ -218,6 +218,7 @@
                             @user.f_name
                             —
                             @user.email
+                            (@user.status)
 
                         </option>
                     }
@@ -279,10 +280,11 @@
                     </strong>
 
                     <p>
-                        After approval, the system checks the selected
-                        section's strand and year level against the
-                        curriculum mappings, then enrolls the student
-                        into the corresponding classrooms.
+                        The system checks the selected section's strand
+                        and year level against curriculum mappings, then
+                        enrolls the student into the corresponding classrooms.
+                        Pending accounts are activated after enrollment;
+                        active accounts keep their current status.
                     </p>
 
                 </div>
@@ -290,7 +292,7 @@
                 <button type="submit"
                         class="btn-submit">
 
-                    Approve &amp; Complete Enrollment
+                    Assign Section &amp; Complete Enrollment
 
                 </button>
 

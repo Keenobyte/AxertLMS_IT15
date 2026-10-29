@@ -207,6 +207,7 @@
     }
 
     .approve {
+        display: inline-block;
         background: rgba(52,211,153,.12);
         border: 1px solid rgba(52,211,153,.38);
         color: #a7f3d0;
@@ -214,6 +215,7 @@
         padding: .62rem .8rem;
         font-weight: 700;
         cursor: pointer;
+        text-decoration: none;
         white-space: nowrap;
     }
 
@@ -337,7 +339,7 @@
             <h1>Enrollment overview</h1>
             <p>Review applications, approve students, and complete academic placement.</p>
         </div>
-        <a class="header-action" asp-action="RegisterStudent">Assign approved student</a>
+        <a class="header-action" asp-action="RegisterStudent">Complete student enrollment</a>
     </header>
 
     <section class="metric-grid" aria-label="Enrollment metrics">
@@ -359,11 +361,7 @@
                 {
                     <div class="queue-row">
                         <div><span class="queue-position">@position</span><span class="student-name">@applicant.l_name, @applicant.f_name <span class="status">PENDING</span></span><span class="student-email">@applicant.email</span></div>
-                        <form asp-action="ApproveStudentApplication" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@applicant.user_id" />
-                            <button type="submit" class="approve" onclick="return confirm('Approve this enrollment application?');">Approve application</button>
-                        </form>
+                        <a class="approve" asp-action="RegisterStudent">Review &amp; assign section</a>
                     </div>
                     position++;
                 }
@@ -408,7 +406,7 @@
             <div class="summary-row"><span>Faculty members</span><strong>@ViewBag.TotalTeachers</strong></div>
             <div class="summary-row"><span>Academic sections</span><strong>@ViewBag.TotalSections</strong></div>
             <div class="summary-row"><span>Course subjects</span><strong>@ViewBag.TotalSubjects</strong></div>
-            <div class="summary-note">Approve the application first. Then use <strong>Assign approved student</strong> to place the student in a section and generate a student number.</div>
+            <div class="summary-note">Use <strong>Complete student enrollment</strong> to approve pending applications or finish profiles for active students, assign a section, and generate a student number.</div>
         </aside>
     </section>
 </main>

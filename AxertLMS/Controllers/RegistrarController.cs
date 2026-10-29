@@ -27,20 +27,21 @@ namespace AxertLMS.Controllers
         }
 
         // ============================================================
-        // PENDING STUDENT APPLICATIONS
+        // STUDENT ENROLLMENT PROFILES
         // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> RegisterStudent(
             CancellationToken cancellationToken)
         {
-            var pendingUsers =
+            var usersNeedingEnrollment =
                 await _context.Users
                     .AsNoTracking()
                     .Where(
                         u =>
                             u.role == "Student" &&
-                            u.status == "Pending" &&
+                            (u.status == "Pending" ||
+                             u.status == "Active") &&
                             !_context.Students.Any(
                                 s =>
                                     s.user_id ==
@@ -62,8 +63,8 @@ namespace AxertLMS.Controllers
                     .ToListAsync(
                         cancellationToken);
 
-            ViewBag.PendingUsers =
-                pendingUsers;
+            ViewBag.UsersNeedingEnrollment =
+                usersNeedingEnrollment;
 
             ViewBag.Sections =
                 sections;
@@ -95,8 +96,9 @@ namespace AxertLMS.Controllers
                 await _context.Subjects.CountAsync(
                     cancellationToken);
 
-            ViewBag.PendingStudents =
+            var pendingApplications =
                 await _context.Users
+                    .AsNoTracking()
                     .Where(
                         u =>
                             u.role == "Student" &&
@@ -105,8 +107,16 @@ namespace AxertLMS.Controllers
                                 s =>
                                     s.user_id ==
                                     u.user_id))
-                    .CountAsync(
+                    .OrderBy(u => u.l_name)
+                    .ThenBy(u => u.f_name)
+                    .ToListAsync(
                         cancellationToken);
+
+            ViewBag.PendingStudents =
+                pendingApplications.Count;
+
+            ViewBag.PendingApplications =
+                pendingApplications;
 
             var recentStudents =
                 await _context.Students
@@ -624,7 +634,7 @@ namespace AxertLMS.Controllers
                  * The database unique indexes below also protect
                  * against duplicate Student/Enrollment records.
                  */
-                var pendingUser =
+                var userToEnroll =
                     await _context.Users
                         .SingleOrDefaultAsync(
                             u =>
@@ -632,14 +642,16 @@ namespace AxertLMS.Controllers
                                     user_id &&
                                 u.role ==
                                     "Student" &&
-                                u.status ==
-                                    "Pending",
+                                (u.status ==
+                                    "Pending" ||
+                                 u.status ==
+                                    "Active"),
                             cancellationToken);
 
-                if (pendingUser == null)
+                if (userToEnroll == null)
                 {
                     TempData["ErrorMessage"] =
-                        "The selected student application is no longer pending.";
+                        "The selected student account is no longer eligible for enrollment.";
 
                     await transaction.RollbackAsync(
                         cancellationToken);
@@ -805,7 +817,13 @@ namespace AxertLMS.Controllers
                  * Activation only occurs after Student creation and
                  * classroom enrollment have succeeded.
                  */
-                pendingUser.status =
+                bool wasPending =
+                    string.Equals(
+                        userToEnroll.status,
+                        "Pending",
+                        StringComparison.OrdinalIgnoreCase);
+
+                userToEnroll.status =
                     "Active";
 
                 await _context.SaveChangesAsync(
@@ -816,13 +834,14 @@ namespace AxertLMS.Controllers
 
                 _logger.LogInformation(
                     "STUDENT_APPROVAL_SUCCESS: UserId={UserId}, StudentId={StudentId}, SectionId={SectionId}",
-                    pendingUser.user_id,
+                    userToEnroll.user_id,
                     newStudent.student_id,
                     section_id);
 
                 TempData["SuccessMessage"] =
-                    $"Student approved successfully. " +
-                    $"Student number: {newStudent.student_number}.";
+                    wasPending
+                        ? $"Student approved successfully. Student number: {newStudent.student_number}."
+                        : $"Student profile completed successfully. Student number: {newStudent.student_number}.";
 
                 return RedirectToAction(
                     nameof(RegisterStudent));
